@@ -1,0 +1,4422 @@
+{
+  "sourceLanguage": "uk",
+  "strings": {
+    "": {},
+    " Нечитних рядків: %lld — їх буде пропущено.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " Unreadable rows: %lld — they will be skipped."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " Нечитних рядків: %lld — їх буде пропущено."
+          }
+        }
+      }
+    },
+    "%@ %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "%@, %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%@, %@, %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@, %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@, %2$@, %3$@"
+          }
+        }
+      }
+    },
+    "%@. Відповідь: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Answer: %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@. Відповідь: %2$@"
+          }
+        }
+      }
+    },
+    "%@: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@: %2$lld"
+          }
+        }
+      }
+    },
+    "%lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld"
+          }
+        }
+      }
+    },
+    "%lld %@": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld %2$@"
+          }
+        }
+      }
+    },
+    "%lld / %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld / %2$lld"
+          }
+        }
+      }
+    },
+    "%lld год тому": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld h ago"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld год тому"
+          }
+        }
+      }
+    },
+    "%lld день": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld day"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld days"
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld дні"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld днів"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld день"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld дн тому": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld d ago"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld дн тому"
+          }
+        }
+      }
+    },
+    "%lld з %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld з %2$lld"
+          }
+        }
+      }
+    },
+    "%lld картка постійно забувається": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld card keeps being forgotten"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld cards keep being forgotten"
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld картки постійно забуваються"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld карток постійно забуваються"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld картка постійно забувається"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld картка чекає на повторення": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld card is waiting to be reviewed"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld cards are waiting to be reviewed"
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld картки чекають на повторення"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld карток чекає на повторення"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld картка чекає на повторення"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld карток": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld card"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld cards"
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld картки"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld карток"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld картка"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld карток · %lld нових": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld cards · %lld new"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld карток · %2$lld нових"
+          }
+        }
+      }
+    },
+    "%lld нових": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld new"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld new"
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld нова"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld нові"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld нових"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld нових"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld нових сьогодні": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld new today"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld new today"
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld нові сьогодні"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld нових сьогодні"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld нова сьогодні"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld помилок": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld lapse"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld lapses"
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld помилки"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld помилок"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld помилка"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld хв тому": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld min ago"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld хв тому"
+          }
+        }
+      }
+    },
+    "10 хвилин щодня": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ten minutes a day"
+          }
+        }
+      }
+    },
+    "Google": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google"
+          }
+        }
+      }
+    },
+    "Google Таблицю не підключено": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Google Sheet connected"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Таблицю не підключено"
+          }
+        }
+      }
+    },
+    "Google Таблицю не підключено.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Google Sheet connected."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Таблицю не підключено."
+          }
+        }
+      }
+    },
+    "ID таблиці або її посилання": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spreadsheet ID or its link"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ID таблиці або її посилання"
+          }
+        }
+      }
+    },
+    "«Завантажити все заново» стирає картки й читає їх із Таблиці ще раз. Розклад повторень зберігається за ідентифікатором картки.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“Re-download everything” erases the cards and reads them from the Sheet again. Scheduling is kept, matched by card id."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«Завантажити все заново» стирає картки й читає їх із Таблиці ще раз. Розклад повторень зберігається за ідентифікатором картки."
+          }
+        }
+      }
+    },
+    "«Система» стежить за налаштуванням телефона, зокрема за автоматичним перемиканням увечері.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“System” follows the phone’s own setting, including its automatic switch in the evening."
+          }
+        }
+      }
+    },
+    "×": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "×"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "×"
+          }
+        }
+      }
+    },
+    "Їх відкладено, щоб вони не займали сесію. Перепиши або видали.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "They are set aside so they do not take up the session. Rewrite or delete them."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Їх відкладено, щоб вони не займали сесію. Перепиши або видали."
+          }
+        }
+      }
+    },
+    "Автозаповнення": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autofill"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Автозаповнення"
+          }
+        }
+      }
+    },
+    "Автозаповнення відповіді": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autofill the answer"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Автозаповнення відповіді"
+          }
+        }
+      }
+    },
+    "Бачиш питання — згадуєш відповідь — торкаєшся картки, щоб перевірити. Саме зусилля згадати і закріплює памʼять.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You see the question, you recall the answer, you tap the card to check. The effort of recalling is what fixes it in memory."
+          }
+        }
+      }
+    },
+    "Важко": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hard"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Важко"
+          }
+        }
+      }
+    },
+    "Ваша правка": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your edit"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваша правка"
+          }
+        }
+      }
+    },
+    "Ваші правки, які перезаписала Таблиця.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your edits that the Sheet overwrote."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваші правки, які перезаписала Таблиця."
+          }
+        }
+      }
+    },
+    "Введи відповідь": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type the answer"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введи відповідь"
+          }
+        }
+      }
+    },
+    "Вводити відповідь": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type the answer"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вводити відповідь"
+          }
+        }
+      }
+    },
+    "Версія": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Версія"
+          }
+        }
+      }
+    },
+    "Вигляд": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appearance"
+          }
+        }
+      }
+    },
+    "Видалити": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити"
+          }
+        }
+      }
+    },
+    "Видалити картку?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this card?"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити картку?"
+          }
+        }
+      }
+    },
+    "Видалити ключ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete the key"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити ключ"
+          }
+        }
+      }
+    },
+    "Вище": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Higher"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вище"
+          }
+        }
+      }
+    },
+    "Вище — частіші повторення й менше забувань.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Higher means more frequent reviews and less forgetting."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вище — частіші повторення й менше забувань."
+          }
+        }
+      }
+    },
+    "Вкажіть ID таблиці.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter the spreadsheet ID."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вкажіть ID таблиці."
+          }
+        }
+      }
+    },
+    "Вставте JSON ключа службового акаунта": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste the service-account key JSON"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставте JSON ключа службового акаунта"
+          }
+        }
+      }
+    },
+    "Вхідні · %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inbox · %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вхідні · %lld"
+          }
+        }
+      }
+    },
+    "Відкриває сесію повторення.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens a review session."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкриває сесію повторення."
+          }
+        }
+      }
+    },
+    "Відновити": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відновити"
+          }
+        }
+      }
+    },
+    "Відновити розклад із цієї копії?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore scheduling from this backup?"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відновити розклад із цієї копії?"
+          }
+        }
+      }
+    },
+    "Відновлення з Таблиці": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recovery from the Sheet"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відновлення з Таблиці"
+          }
+        }
+      }
+    },
+    "Відновлено карток: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cards restored: %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відновлено карток: %lld"
+          }
+        }
+      }
+    },
+    "Відповідь": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answer"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відповідь"
+          }
+        }
+      }
+    },
+    "Відповідь без HTTP-статусу": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Response with no HTTP status"
+          }
+        }
+      }
+    },
+    "Відтворено карток: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cards rebuilt: %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відтворено карток: %lld"
+          }
+        }
+      }
+    },
+    "Відхилити": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відхилити"
+          }
+        }
+      }
+    },
+    "Готово": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готово"
+          }
+        }
+      }
+    },
+    "Далі": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Далі"
+          }
+        }
+      }
+    },
+    "До колод": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back to decks"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "До колод"
+          }
+        }
+      }
+    },
+    "Добре": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добре"
+          }
+        }
+      }
+    },
+    "Добрий вечір": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good evening"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добрий вечір"
+          }
+        }
+      }
+    },
+    "Добрий день": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good afternoon"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добрий день"
+          }
+        }
+      }
+    },
+    "Доброго ранку": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good morning"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доброго ранку"
+          }
+        }
+      }
+    },
+    "Доброї ночі": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good night"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доброї ночі"
+          }
+        }
+      }
+    },
+    "Додано «%@» до «%@».": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added “%@” to “%@”."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Додано «%1$@» до «%2$@»."
+          }
+        }
+      }
+    },
+    "Додати": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати"
+          }
+        }
+      }
+    },
+    "Додати ${front} до ${deck}": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add ${front} to ${deck}"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати ${front} до ${deck}"
+          }
+        }
+      }
+    },
+    "Додати картку": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a card"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати картку"
+          }
+        }
+      }
+    },
+    "Додати картку в %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a card in %@"
+          }
+        }
+      }
+    },
+    "Додати нові картки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add new cards"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати нові картки"
+          }
+        }
+      }
+    },
+    "Додає картку до колоди. Вона потрапить у таблицю під час наступної синхронізації.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adds a card to a deck. It reaches the spreadsheet on the next sync."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додає картку до колоди. Вона потрапить у таблицю під час наступної синхронізації."
+          }
+        }
+      }
+    },
+    "Доступ є, але жодного аркуша з картками не знайдено.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Access works, but no worksheet with cards was found."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доступ є, але жодного аркуша з картками не знайдено."
+          }
+        }
+      }
+    },
+    "Доступ є. Аркушів із картками: %lld.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Access works. Worksheets with cards: %lld."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доступ є. Аркушів із картками: %lld."
+          }
+        }
+      }
+    },
+    "Експортувати локальну базу": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export the local database"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Експортувати локальну базу"
+          }
+        }
+      }
+    },
+    "Журнал «_log» у Таблиці містить усю історію повторень, тож розклад можна відтворити з нуля — навіть якщо телефон загублено. Перед заміною автоматично створюється резервна копія.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The “_log” sheet holds the full review history, so scheduling can be rebuilt from nothing — even if the phone is lost. A backup is taken automatically before anything is replaced."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Журнал «_log» у Таблиці містить усю історію повторень, тож розклад можна відтворити з нуля — навіть якщо телефон загублено. Перед заміною автоматично створюється резервна копія."
+          }
+        }
+      }
+    },
+    "За 30 днів": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last 30 days"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "За 30 днів"
+          }
+        }
+      }
+    },
+    "За 7 днів": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last 7 days"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "За 7 днів"
+          }
+        }
+      }
+    },
+    "Завантажити все заново": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Re-download everything"
+          }
+        }
+      }
+    },
+    "Завантажити все заново?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Re-download everything?"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажити все заново?"
+          }
+        }
+      }
+    },
+    "Завантажити заново": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Re-download"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажити заново"
+          }
+        }
+      }
+    },
+    "Завантажити картки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download the cards"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажити картки"
+          }
+        }
+      }
+    },
+    "Закрити": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрити"
+          }
+        }
+      }
+    },
+    "Замінити ключ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replace the key"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Замінити ключ"
+          }
+        }
+      }
+    },
+    "Заповнити відповідь": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fill in the answer"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заповнити відповідь"
+          }
+        }
+      }
+    },
+    "Застосувати мою правку": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apply my edit"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Застосувати мою правку"
+          }
+        }
+      }
+    },
+    "Зберегти": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберегти"
+          }
+        }
+      }
+    },
+    "Зберегти й додати ще": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save and add another"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберегти й додати ще"
+          }
+        }
+      }
+    },
+    "Зберегти й закрити": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save and close"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберегти й закрити"
+          }
+        }
+      }
+    },
+    "Зберегти ключ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save the key"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберегти ключ"
+          }
+        }
+      }
+    },
+    "Збережене з інших застосунків. Торкніться, щоб дописати відповідь.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved from other apps. Tap to finish the answer."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Збережене з інших застосунків. Торкніться, щоб дописати відповідь."
+          }
+        }
+      }
+    },
+    "Збережено": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Збережено"
+          }
+        }
+      }
+    },
+    "Збережено «%@» в інбокс — відповідь допишеш у застосунку.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved “%@” to the inbox — finish the answer in the app."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Збережено «%@» в інбокс — відповідь допишеш у застосунку."
+          }
+        }
+      }
+    },
+    "Збережено карток: %lld.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cards backed up: %lld."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Збережено карток: %lld."
+          }
+        }
+      }
+    },
+    "Зберігаються останні %lld копій. Вони потрапляють у резервну копію iPhone, тож переживають втрату пристрою. Відновлення повертає лише розклад — тексти карток лишаються з Таблиці.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The newest %lld backups are kept. They ride along in your iPhone backup, so they survive losing the device. Restoring brings back scheduling only — card text stays with the Sheet."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберігаються останні %lld копій. Вони потрапляють у резервну копію iPhone, тож переживають втрату пристрою. Відновлення повертає лише розклад — тексти карток лишаються з Таблиці."
+          }
+        }
+      }
+    },
+    "Зворотна картка": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reverse card"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зворотна картка"
+          }
+        }
+      }
+    },
+    "Зміни потраплять у Таблицю під час наступної синхронізації.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changes reach the Sheet on the next sync."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зміни потраплять у Таблицю під час наступної синхронізації."
+          }
+        }
+      }
+    },
+    "Значення задано в аркуші `_meta` — воно має пріоритет.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set in the `_meta` sheet, which takes precedence."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Значення задано в аркуші `_meta` — воно має пріоритет."
+          }
+        }
+      }
+    },
+    "Знову": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Again"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Знову"
+          }
+        }
+      }
+    },
+    "Картка": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Card"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Картка"
+          }
+        }
+      }
+    },
+    "Картка %lld з %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Card %lld of %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Картка %1$lld з %2$lld"
+          }
+        }
+      }
+    },
+    "Картка повернеться в чергу, а лічильник помилок обнулиться. Те, наскільки добре ти її памʼятаєш, збережеться.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The card returns to the queue and its lapse count resets. How well you remember it is kept."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Картка повернеться в чергу, а лічильник помилок обнулиться. Те, наскільки добре ти її памʼятаєш, збережеться."
+          }
+        }
+      }
+    },
+    "Картка потрапить у Таблицю під час наступної синхронізації. Без інтернету вона зачекає в черзі.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The card reaches the Sheet on the next sync. Offline, it waits in the queue."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Картка потрапить у Таблицю під час наступної синхронізації. Без інтернету вона зачекає в черзі."
+          }
+        }
+      }
+    },
+    "Картки будуть стерті й прочитані з Таблиці ще раз. Розклад повторень збережеться. Незбережені локальні зміни спочатку відправляться в Таблицю.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cards will be erased and read from the Sheet again. Scheduling is kept. Unsaved local changes are pushed to the Sheet first."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Картки будуть стерті й прочитані з Таблиці ще раз. Розклад повторень збережеться. Незбережені локальні зміни спочатку відправляться в Таблицю."
+          }
+        }
+      }
+    },
+    "Картки живуть у вашій Google Таблиці. Вставте ключ службового акаунта і посилання на таблицю — і застосунок завантажить їх.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your cards live in your Google Sheet. Paste a service-account key and the spreadsheet link, and the app will download them."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Картки живуть у вашій Google Таблиці. Вставте ключ службового акаунта і посилання на таблицю — і застосунок завантажить їх."
+          }
+        }
+      }
+    },
+    "Картки, які ви забуваєте, приходитимуть частіше; ті, що знаєте — рідше. Головне — не пропускати дні: пропуски накопичують борг.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cards you forget come back more often; the ones you know, less often. What matters is not skipping days — skipped days build up a debt."
+          }
+        }
+      }
+    },
+    "Карток до повторення: %lld.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cards due: %lld."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Карток до повторення: %lld."
+          }
+        }
+      }
+    },
+    "Ключ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Key"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ"
+          }
+        }
+      }
+    },
+    "Ключ Anthropic API": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anthropic API key"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ Anthropic API"
+          }
+        }
+      }
+    },
+    "Ключ дійсний. Поділіться таблицею з %@ як редактором.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The key is valid. Share the spreadsheet with %@ as an Editor."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ дійсний. Поділіться таблицею з %@ як редактором."
+          }
+        }
+      }
+    },
+    "Ключ збережено для %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Key saved for %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ збережено для %@"
+          }
+        }
+      }
+    },
+    "Ключ зберігається лише в Keychain і надсилається тільки в api.anthropic.com.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The key is stored only in the Keychain and sent only to api.anthropic.com."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ зберігається лише в Keychain і надсилається тільки в api.anthropic.com."
+          }
+        }
+      }
+    },
+    "Ключ не додано": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No key added"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ не додано"
+          }
+        }
+      }
+    },
+    "Колода": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deck"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Колода"
+          }
+        }
+      }
+    },
+    "Колоди": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decks"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Колоди"
+          }
+        }
+      }
+    },
+    "Колоди «%@» немає.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is no deck named “%@”."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Колоди «%@» немає."
+          }
+        }
+      }
+    },
+    "Колір": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Colour"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Колір"
+          }
+        }
+      }
+    },
+    "Конфлікти синхронізації": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync conflicts"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Конфлікти синхронізації"
+          }
+        }
+      }
+    },
+    "Конфлікти синхронізації: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync conflicts: %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Конфлікти синхронізації: %lld"
+          }
+        }
+      }
+    },
+    "Конфліктів немає": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No conflicts"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Конфліктів немає"
+          }
+        }
+      }
+    },
+    "Копій ще немає. Перша створюється автоматично раз на день.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No backups yet. The first is created automatically once a day."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копій ще немає. Перша створюється автоматично раз на день."
+          }
+        }
+      }
+    },
+    "Крок %lld з %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Step %lld of %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Крок %1$lld з %2$lld"
+          }
+        }
+      }
+    },
+    "Крок після помилки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relearning step"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Крок після помилки"
+          }
+        }
+      }
+    },
+    "Кроки вивчення": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learning steps"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кроки вивчення"
+          }
+        }
+      }
+    },
+    "Кроки поки що незмінні: від їх кількості залежить обмеження параметрів FSRS.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The steps are fixed for now: how many there are constrains the FSRS parameters."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кроки поки що незмінні: від їх кількості залежить обмеження параметрів FSRS."
+          }
+        }
+      }
+    },
+    "Легко": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Easy"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Легко"
+          }
+        }
+      }
+    },
+    "Модель": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Модель"
+          }
+        }
+      }
+    },
+    "На день": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per day"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На день"
+          }
+        }
+      }
+    },
+    "На сьогодні все": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That is everything for today"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На сьогодні все"
+          }
+        }
+      }
+    },
+    "На сьогодні все повторено.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything due today has been reviewed."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На сьогодні все повторено."
+          }
+        }
+      }
+    },
+    "На сьогодні все — до завтра": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All done for today — see you tomorrow"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На сьогодні все — до завтра"
+          }
+        }
+      }
+    },
+    "Нагадування": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reminder"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нагадування"
+          }
+        }
+      }
+    },
+    "Накопичилось": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A backlog has built up"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Накопичилось"
+          }
+        }
+      }
+    },
+    "Налаштування": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Налаштування"
+          }
+        }
+      }
+    },
+    "Наприклад: reluctant": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For example: reluctant"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Наприклад: reluctant"
+          }
+        }
+      }
+    },
+    "Наприклад: неохочий": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For example: reluctant"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Наприклад: неохочий"
+          }
+        }
+      }
+    },
+    "Наступна картка %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next card %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Наступна картка %@"
+          }
+        }
+      }
+    },
+    "Наступні 7 днів": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The next 7 days"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Наступні 7 днів"
+          }
+        }
+      }
+    },
+    "Наступні картки зʼявляться завтра вранці.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The next cards arrive tomorrow morning."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Наступні картки зʼявляться завтра вранці."
+          }
+        }
+      }
+    },
+    "Не вдалося заповнити (HTTP %lld).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not autofill (HTTP %lld)."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося заповнити (HTTP %lld)."
+          }
+        }
+      }
+    },
+    "Не вдалося заповнити: відповідь не вдалося розібрати.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not autofill: the reply could not be parsed."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося заповнити: відповідь не вдалося розібрати."
+          }
+        }
+      }
+    },
+    "Не вдалося заповнити: забагато запитів. Спробуй за хвилину.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not autofill: too many requests. Try again in a minute."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося заповнити: забагато запитів. Спробуй за хвилину."
+          }
+        }
+      }
+    },
+    "Не вдалося заповнити: ключ Anthropic відхилено.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not autofill: the Anthropic key was rejected."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося заповнити: ключ Anthropic відхилено."
+          }
+        }
+      }
+    },
+    "Не вдалося заповнити: немає звʼязку.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not autofill: no connection."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося заповнити: немає звʼязку."
+          }
+        }
+      }
+    },
+    "Не вдалося заповнити: немає ключа Anthropic. Додай його в Налаштуваннях.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not autofill: no Anthropic key. Add one in Settings."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося заповнити: немає ключа Anthropic. Додай його в Налаштуваннях."
+          }
+        }
+      }
+    },
+    "Не вдалося звернутися до Keychain: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not reach the Keychain: %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося звернутися до Keychain: %@"
+          }
+        }
+      }
+    },
+    "Не вдалося порахувати — відкрий застосунок.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not count — open the app."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося порахувати — відкрий застосунок."
+          }
+        }
+      }
+    },
+    "Не вдалося синхронізувати — спробуємо ще раз": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync failed — we will try again"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося синхронізувати — спробуємо ще раз"
+          }
+        }
+      }
+    },
+    "Не згадав — «Знову». Згадав легко — «Легко». Далі застосунок сам вирішує, коли показати картку наступного разу.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Didn't get it — “Again”. Came easily — “Easy”. From there the app decides when to show the card next."
+          }
+        }
+      }
+    },
+    "Не зовсім": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not quite"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не зовсім"
+          }
+        }
+      }
+    },
+    "Не зовсім. Правильна відповідь: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not quite. The correct answer is: %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не зовсім. Правильна відповідь: %@"
+          }
+        }
+      }
+    },
+    "Немає що повторювати": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing to review"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Немає що повторювати"
+          }
+        }
+      }
+    },
+    "Нижче": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lower"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нижче"
+          }
+        }
+      }
+    },
+    "Нова картка": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New card"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нова картка"
+          }
+        }
+      }
+    },
+    "Нових карток на день": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New cards per day"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нових карток на день"
+          }
+        }
+      }
+    },
+    "Нові картки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New cards"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нові картки"
+          }
+        }
+      }
+    },
+    "Озвучувати питання": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read the question aloud"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Озвучувати питання"
+          }
+        }
+      }
+    },
+    "Оновлено %lld карток; розклад збережено для %lld.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updated %lld cards; scheduling kept for %lld."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Оновлено %1$lld карток; розклад збережено для %2$lld."
+          }
+        }
+      }
+    },
+    "Ось так виглядає відповідь": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is what an answer looks like"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ось так виглядає відповідь"
+          }
+        }
+      }
+    },
+    "Офлайн — зміни синхронізуються пізніше": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline — changes will sync later"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Офлайн — зміни синхронізуються пізніше"
+          }
+        }
+      }
+    },
+    "Памʼятається": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retention"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Памʼятається"
+          }
+        }
+      }
+    },
+    "Перебудувати": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rebuild"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перебудувати"
+          }
+        }
+      }
+    },
+    "Перебудувати розклад із журналу": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rebuild scheduling from the log"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перебудувати розклад із журналу"
+          }
+        }
+      }
+    },
+    "Перебудувати розклад?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rebuild scheduling?"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перебудувати розклад?"
+          }
+        }
+      }
+    },
+    "Перевірити": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перевірити"
+          }
+        }
+      }
+    },
+    "Перевірити зʼєднання": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check the connection"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перевірити зʼєднання"
+          }
+        }
+      }
+    },
+    "Перевірте ключ службового акаунта в Налаштуваннях.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check the service-account key in Settings."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перевірте ключ службового акаунта в Налаштуваннях."
+          }
+        }
+      }
+    },
+    "Переписати": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rewrite"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Переписати"
+          }
+        }
+      }
+    },
+    "Перша синхронізація може зайняти кілька секунд.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The first sync can take a few seconds."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перша синхронізація може зайняти кілька секунд."
+          }
+        }
+      }
+    },
+    "Питання": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Question"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Питання"
+          }
+        }
+      }
+    },
+    "Питання читатиметься вголос, щойно картка зʼявиться; довгий дотик озвучує будь-яку картку. З уведенням відповіді картка розкривається не дотиком, а після набраного слова.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The question is read aloud as soon as the card appears; a long press speaks any card. With typed answers, a card is revealed by what you type rather than by a tap."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Питання читатиметься вголос, щойно картка зʼявиться; довгий дотик озвучує будь-яку картку. З уведенням відповіді картка розкривається не дотиком, а після набраного слова."
+          }
+        }
+      }
+    },
+    "Повернути в чергу": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Return to the queue"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повернути в чергу"
+          }
+        }
+      }
+    },
+    "Повертає кількість карток на сьогодні.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Returns how many cards are due today."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повертає кількість карток на сьогодні."
+          }
+        }
+      }
+    },
+    "Повторення": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reviews"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторення"
+          }
+        }
+      }
+    },
+    "Поділитися базою": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share the database"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поділитися базою"
+          }
+        }
+      }
+    },
+    "Позиція": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Position"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Позиція"
+          }
+        }
+      }
+    },
+    "Показати вступ ще раз": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show the introduction again"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показати вступ ще раз"
+          }
+        }
+      }
+    },
+    "Порожнє питання — нічого додавати.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The question is empty — there is nothing to add."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Порожнє питання — нічого додавати."
+          }
+        }
+      }
+    },
+    "Порядок": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Order"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Порядок"
+          }
+        }
+      }
+    },
+    "Поріг «залипань»": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leech threshold"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поріг «залипань»"
+          }
+        }
+      }
+    },
+    "Поточні дати повторень будуть замінені. Картки, доданої після копії, це не торкнеться.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current review dates will be replaced. Cards added since the backup are not affected."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поточні дати повторень будуть замінені. Картки, доданої після копії, це не торкнеться."
+          }
+        }
+      }
+    },
+    "Потребує уваги": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Needs attention"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Потребує уваги"
+          }
+        }
+      }
+    },
+    "Почати": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Почати"
+          }
+        }
+      }
+    },
+    "Почати повторення": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start reviewing"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Почати повторення"
+          }
+        }
+      }
+    },
+    "Почати повторення в %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start reviewing in %@"
+          }
+        }
+      }
+    },
+    "Правильно": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correct"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Правильно"
+          }
+        }
+      }
+    },
+    "Призупинені картки не потрапляють у чергу. Розклад не змінюється — колода продовжиться з того самого місця.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suspended cards stay out of the queue. Scheduling is unchanged — the deck resumes from the same place."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Призупинені картки не потрапляють у чергу. Розклад не змінюється — колода продовжиться з того самого місця."
+          }
+        }
+      }
+    },
+    "Призупинити": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suspend"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Призупинити"
+          }
+        }
+      }
+    },
+    "Призупинити всі картки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suspend every card"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Призупинити всі картки"
+          }
+        }
+      }
+    },
+    "Призупинити всі картки колоди?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suspend every card in this deck?"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Призупинити всі картки колоди?"
+          }
+        }
+      }
+    },
+    "Приклад календаря: десять днів поспіль": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendar example: ten days in a row"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приклад календаря: десять днів поспіль"
+          }
+        }
+      }
+    },
+    "Приклад речення (необовʼязково)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Example sentence (optional)"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приклад речення (необовʼязково)"
+          }
+        }
+      }
+    },
+    "Приклад: десять днів поспіль": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Example: ten days in a row"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приклад: десять днів поспіль"
+          }
+        }
+      }
+    },
+    "Проведи першу сесію — і тут зʼявляться серія, відсоток запамʼятовування та прогноз на тиждень.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish your first session and your streak, retention and week ahead will appear here."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проведи першу сесію — і тут зʼявляться серія, відсоток запамʼятовування та прогноз на тиждень."
+          }
+        }
+      }
+    },
+    "Пропустити": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пропустити"
+          }
+        }
+      }
+    },
+    "Пропустити поки що": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip for now"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пропустити поки що"
+          }
+        }
+      }
+    },
+    "Під кнопкою — коли картка повернеться": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Under each button is when the card comes back"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Під кнопкою — коли картка повернеться"
+          }
+        }
+      }
+    },
+    "Підключення": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connection"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підключення"
+          }
+        }
+      }
+    },
+    "Підключіть Google Таблицю, щоб їх завантажити.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect a Google Sheet to download them."
+          }
+        }
+      }
+    },
+    "Редагувати": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Редагувати"
+          }
+        }
+      }
+    },
+    "Резервні копії розкладу": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scheduling backups"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Резервні копії розкладу"
+          }
+        }
+      }
+    },
+    "Розклад": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scheduling"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розклад"
+          }
+        }
+      }
+    },
+    "Розклад збережеться — картки просто зникнуть із черги, доки ви їх не повернете.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scheduling is kept — the cards simply leave the queue until you bring them back."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розклад збережеться — картки просто зникнуть із черги, доки ви їх не повернете."
+          }
+        }
+      }
+    },
+    "Розтягнути на 3 дні": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spread over 3 days"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розтягнути на 3 дні"
+          }
+        }
+      }
+    },
+    "Рядок буде позначено видаленим у Таблиці під час наступної синхронізації.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The row will be marked deleted in the Sheet on the next sync."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Рядок буде позначено видаленим у Таблиці під час наступної синхронізації."
+          }
+        }
+      }
+    },
+    "Світла": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
+          }
+        }
+      }
+    },
+    "Серія": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Streak"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Серія"
+          }
+        }
+      }
+    },
+    "Серія: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Streak: %@"
+          }
+        }
+      }
+    },
+    "Синхронізацію перервано.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The sync was interrupted."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Синхронізацію перервано."
+          }
+        }
+      }
+    },
+    "Синхронізація…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Syncing…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Синхронізація…"
+          }
+        }
+      }
+    },
+    "Синхронізовано %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synced %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Синхронізовано %@"
+          }
+        }
+      }
+    },
+    "Синхронізовано.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synced."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Синхронізовано."
+          }
+        }
+      }
+    },
+    "Синхронізувати зараз": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync now"
+          }
+        }
+      }
+    },
+    "Система": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
+          }
+        }
+      }
+    },
+    "Скасувати": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скасувати"
+          }
+        }
+      }
+    },
+    "Скасувати останню оцінку": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undo the last rating"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скасувати останню оцінку"
+          }
+        }
+      }
+    },
+    "Скільки карток": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How many cards"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скільки карток"
+          }
+        }
+      }
+    },
+    "Скільки карток до повторення": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How many cards are due"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скільки карток до повторення"
+          }
+        }
+      }
+    },
+    "Скільки карток у %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How many cards in %@"
+          }
+        }
+      }
+    },
+    "Скільки нових карток із цієї колоди зʼявиться в черзі за день. 0 — не показувати нових.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How many new cards from this deck enter the queue each day. 0 shows none."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скільки нових карток із цієї колоди зʼявиться в черзі за день. 0 — не показувати нових."
+          }
+        }
+      }
+    },
+    "Службовий акаунт": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Service account"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Службовий акаунт"
+          }
+        }
+      }
+    },
+    "Спочатку додайте ключ службового акаунта.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a service-account key first."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спочатку додайте ключ службового акаунта."
+          }
+        }
+      }
+    },
+    "Спочатку підключіть Google Таблицю — картки додаються в її аркуші.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect a Google Sheet first — cards are added to its worksheets."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спочатку підключіть Google Таблицю — картки додаються в її аркуші."
+          }
+        }
+      }
+    },
+    "Спочатку спробуйте згадати самі": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try to recall it yourself first"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спочатку спробуйте згадати самі"
+          }
+        }
+      }
+    },
+    "Статистика": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stats"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Статистика"
+          }
+        }
+      }
+    },
+    "Створити копію зараз": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back up now"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Створити копію зараз"
+          }
+        }
+      }
+    },
+    "Створиться одна картка: питання → відповідь.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One card will be created: question → answer."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Створиться одна картка: питання → відповідь."
+          }
+        }
+      }
+    },
+    "Створяться дві картки: питання → відповідь і навпаки.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Two cards will be created: question → answer and the reverse."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Створяться дві картки: питання → відповідь і навпаки."
+          }
+        }
+      }
+    },
+    "Сьогодні": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сьогодні"
+          }
+        }
+      }
+    },
+    "Сьогодні %lld повторень — це набагато більше за звичайні %lld на день.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld reviews are due today — far more than the usual %lld a day."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Сьогодні %1$lld повторень — це набагато більше за звичайні %2$lld на день."
+          }
+        }
+      }
+    },
+    "Сьогодні залишиться %lld. Решта %lld переїде на завтра й післязавтра — почнемо з тих, що ти памʼятаєш найкраще.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld will stay today. The other %lld move to tomorrow and the day after, starting with the ones you remember best."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Сьогодні залишиться %1$lld. Решта %2$lld переїде на завтра й післязавтра — почнемо з тих, що ти памʼятаєш найкраще."
+          }
+        }
+      }
+    },
+    "Сьогодні сюди входить усе прострочене.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today includes everything overdue."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сьогодні сюди входить усе прострочене."
+          }
+        }
+      }
+    },
+    "Тема": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theme"
+          }
+        }
+      }
+    },
+    "Темна": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark"
+          }
+        }
+      }
+    },
+    "Торкнись, щоб перевірити": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap to check"
+          }
+        }
+      }
+    },
+    "Торкніться, щоб побачити відповідь": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap to see the answer"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Торкніться, щоб побачити відповідь"
+          }
+        }
+      }
+    },
+    "Тут зʼявляться правки, які не потрапили в Таблицю.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edits that did not reach the Sheet will appear here."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тут зʼявляться правки, які не потрапили в Таблицю."
+          }
+        }
+      }
+    },
+    "Тут не вчать. Тут згадують.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You don't study here. You remember."
+          }
+        }
+      }
+    },
+    "У Таблиці зараз": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Currently in the Sheet"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У Таблиці зараз"
+          }
+        }
+      }
+    },
+    "У Таблиці немає аркуша _log — відновлювати нема з чого.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The spreadsheet has no _log sheet — there is nothing to rebuild from."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У Таблиці немає аркуша _log — відновлювати нема з чого."
+          }
+        }
+      }
+    },
+    "У журналі немає жодного повторення. Весь локальний розклад буде скинуто, і всі картки стануть новими.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The log holds no reviews at all. All local scheduling will be reset and every card will become new."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У журналі немає жодного повторення. Весь локальний розклад буде скинуто, і всі картки стануть новими."
+          }
+        }
+      }
+    },
+    "Увесь локальний розклад буде замінено. Повторень для відтворення: %lld.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All local scheduling will be replaced. Reviews to replay: %lld."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Увесь локальний розклад буде замінено. Повторень для відтворення: %lld."
+          }
+        }
+      }
+    },
+    "Це можна зробити пізніше в Налаштуваннях.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can do this later in Settings."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Це можна зробити пізніше в Налаштуваннях."
+          }
+        }
+      }
+    },
+    "Це не схоже на ID таблиці Google.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That does not look like a Google spreadsheet ID."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Це не схоже на ID таблиці Google."
+          }
+        }
+      }
+    },
+    "Ця картка постійно забувається — зазвичай це означає, що вона надто довга або питання допускає кілька відповідей. Перепиши її коротше й однозначніше.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This card keeps being forgotten — usually that means it is too long, or the question allows several answers. Rewrite it shorter and less ambiguous."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ця картка постійно забувається — зазвичай це означає, що вона надто довга або питання допускає кілька відповідей. Перепиши її коротше й однозначніше."
+          }
+        }
+      }
+    },
+    "Ця копія створена новішою версією застосунку (формат %lld).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This backup was made by a newer version of the app (format %lld)."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ця копія створена новішою версією застосунку (формат %lld)."
+          }
+        }
+      }
+    },
+    "Цільове запамʼятовування": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Target retention"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цільове запамʼятовування"
+          }
+        }
+      }
+    },
+    "Час": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Час"
+          }
+        }
+      }
+    },
+    "Час повторити": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time to review"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Час повторити"
+          }
+        }
+      }
+    },
+    "Чесно оціни, як згадалось": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Be honest about how it came back"
+          }
+        }
+      }
+    },
+    "Ще не синхронізовано": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not synced yet"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ще не синхронізовано"
+          }
+        }
+      }
+    },
+    "Ще немає даних": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No data yet"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ще немає даних"
+          }
+        }
+      }
+    },
+    "Ще немає жодної колоди — спершу підключи таблицю.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There are no decks yet — connect a spreadsheet first."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ще немає жодної колоди — спершу підключи таблицю."
+          }
+        }
+      }
+    },
+    "Ще немає колод": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No decks yet"
+          }
+        }
+      }
+    },
+    "Ще трохи": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A little more"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ще трохи"
+          }
+        }
+      }
+    },
+    "Що на лицьовому боці?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What is on the front?"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Що на лицьовому боці?"
+          }
+        }
+      }
+    },
+    "Щоденне нагадування": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daily reminder"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Щоденне нагадування"
+          }
+        }
+      }
+    },
+    "до повторення: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "due: %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "до повторення: %lld"
+          }
+        }
+      }
+    },
+    "за %lld дн": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "in %lld d"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "за %lld дн"
+          }
+        }
+      }
+    },
+    "забуто": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "forgotten"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "забуто"
+          }
+        }
+      }
+    },
+    "завтра": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "tomorrow"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "завтра"
+          }
+        }
+      }
+    },
+    "зниклих: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "missing: %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "зниклих: %lld"
+          }
+        }
+      }
+    },
+    "картки до повторення · ≈ %lld хв": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cards due · ≈ %lld min"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "картки до повторення · ≈ %lld хв"
+          }
+        }
+      }
+    },
+    "код %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "code %lld"
+          }
+        }
+      }
+    },
+    "невідомих у Таблиці: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "unknown in the Sheet: %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "невідомих у Таблиці: %lld"
+          }
+        }
+      }
+    },
+    "новіших залишено: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "newer kept: %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "новіших залишено: %lld"
+          }
+        }
+      }
+    },
+    "повторено": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "reviewed"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "повторено"
+          }
+        }
+      }
+    },
+    "серія": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "streak"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "серія"
+          }
+        }
+      }
+    },
+    "скинуто до нових: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "reset to new: %lld"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "скинуто до нових: %lld"
+          }
+        }
+      }
+    },
+    "сьогодні": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "today"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "сьогодні"
+          }
+        }
+      }
+    },
+    "щойно": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "just now"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "щойно"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

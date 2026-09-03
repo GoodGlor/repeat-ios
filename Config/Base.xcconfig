@@ -1,0 +1,4 @@
+// Committed base config. Local.xcconfig is optional and gitignored, so a fresh
+// clone generates and builds for the simulator without any local setup;
+// device builds need DEVELOPMENT_TEAM, which Local.xcconfig supplies.
+#include? "Local.xcconfig"

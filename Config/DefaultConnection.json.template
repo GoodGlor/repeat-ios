@@ -1,0 +1,21 @@
+{
+  "_comment": [
+    "Copy to Config/DefaultConnection.json — gitignored — to make a fresh",
+    "install arrive already connected (#78). Do not fill this in by hand:",
+    "",
+    "    scripts/set-default-connection.sh ~/Downloads/key.json <sheet-url>",
+    "",
+    "The generated file is copied into the app bundle at build time, so the key",
+    "is extractable from an .ipa. That is fine for a personal build; rotate the",
+    "key before distributing the app to anyone.",
+    "",
+    "With the file absent the app behaves exactly as before: the Google section",
+    "in Settings starts empty and waits for a pasted key."
+  ],
+  "spreadsheetId": "the-id-from-the-sheet-url",
+  "serviceAccount": {
+    "type": "service_account",
+    "client_email": "…@….iam.gserviceaccount.com",
+    "private_key": "-----BEGIN PRIVATE KEY-----\n…\n-----END PRIVATE KEY-----\n"
+  }
+}

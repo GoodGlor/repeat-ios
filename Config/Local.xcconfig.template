@@ -1,0 +1,9 @@
+// Copy to Config/Local.xcconfig and fill in your Apple Developer Team ID.
+// Config/Local.xcconfig is gitignored — the Team ID never lands in the repo.
+//
+// Find it: Xcode → Settings → Accounts → your account → Manage Certificates,
+// or at https://developer.apple.com/account under Membership details.
+//
+// App Groups require a paid Apple Developer Program membership. On a free
+// personal team the entitlement is rejected and AppGroup.containerURL is nil.
+DEVELOPMENT_TEAM = 

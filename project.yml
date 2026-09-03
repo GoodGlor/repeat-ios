@@ -1,0 +1,252 @@
+name: Repeat
+options:
+  bundleIdPrefix: com.goodglor
+  # #38: the app is written in Ukrainian and the string catalogue's keys are the
+  # Ukrainian text, so that is the development language. Without this the bundle
+  # claims English, `Locale.current` resolves to en on a Ukrainian phone, and
+  # every date renders in English under Ukrainian copy.
+  developmentLanguage: uk
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+  xcodeVersion: "26.0"
+
+configs:
+  Debug: debug
+  Release: release
+
+configFiles:
+  Debug: Config/Base.xcconfig
+  Release: Config/Base.xcconfig
+
+packages:
+  # The app does not depend on swift-fsrs directly, and must not: the library
+  # exports Card, CardState and ReviewLog, all of which the app also declares, and
+  # its module name cannot disambiguate them because the package contains a class
+  # named FSRS that shadows it. Scheduling owns the library and exposes value
+  # types instead; the pin lives in its Package.swift.
+  Scheduling:
+    path: Packages/Scheduling
+  # Google Sheets access (§4). Separate from the app for the same reasons: it is
+  # pure, it needs no simulator to test, and keeping Security.framework and the
+  # networking behind a module boundary makes §8's "network only to
+  # googleapis.com" something the build can hold to.
+  GoogleSheets:
+    path: Packages/GoogleSheets
+
+settings:
+  base:
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.10"
+    CODE_SIGN_STYLE: Automatic
+    TARGETED_DEVICE_FAMILY: "1"          # iPhone only
+    SWIFT_STRICT_CONCURRENCY: complete
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    GCC_TREAT_WARNINGS_AS_ERRORS: NO
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: NO
+  configs:
+    Debug:
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+    Release:
+      SWIFT_COMPILATION_MODE: wholemodule
+
+targetTemplates:
+  AppGroupMember:
+    settings:
+      base:
+        INFOPLIST_KEY_CFBundleDisplayName: Repeat
+
+targets:
+
+  Repeat:
+    type: application
+    platform: iOS
+    # There is no top-level `resources:` key in XcodeGen. One used to sit here
+    # listing Assets.xcassets and was silently ignored; the assets shipped
+    # regardless, because they live under `Repeat/` and so arrive through
+    # `sources`. Anything outside a source path has to be listed here with an
+    # explicit `buildPhase` — the same shape of trap as the missing
+    # AppIntents.framework in §7.4: a green build that ships nothing.
+    sources:
+      - path: Repeat
+    postBuildScripts:
+      # #78. Config/DefaultConnection.json is gitignored and usually absent, so
+      # it cannot be a file reference: XcodeGen's `optional: true` only keeps
+      # *generation* from failing, and the build then dies with "couldn't be
+      # opened because there is no such file" on every clean checkout. Copying it
+      # in a script instead also means creating the file does NOT require
+      # regenerating the project.
+      - name: Embed the default Google connection
+        basedOnDependencyAnalysis: false
+        # Xcode 26 sandboxes run-script phases by default, so a path this script
+        # touches has to be declared or `cp` is denied read access. A declared
+        # input that does not exist is fine — Xcode simply treats the phase as
+        # out of date, which it already is.
+        inputFiles:
+          - $(SRCROOT)/Config/DefaultConnection.json
+        outputFiles:
+          - $(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/DefaultConnection.json
+        script: |
+          set -eu
+          source="$SRCROOT/Config/DefaultConnection.json"
+          destination="$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/DefaultConnection.json"
+          if [ -f "$source" ]; then
+            /bin/cp "$source" "$destination"
+            echo "note: embedded Config/DefaultConnection.json"
+          else
+            # Incremental builds keep the previous copy otherwise, so removing
+            # the file locally would not actually disconnect anything.
+            /bin/rm -f "$destination"
+            echo "note: no Config/DefaultConnection.json — the app starts unconfigured"
+          fi
+    entitlements:
+      path: Repeat/Repeat.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.goodglor.repeat
+    dependencies:
+      - package: Scheduling
+        product: Scheduling
+      - package: GoogleSheets
+        product: GoogleSheets
+      # §7.4. Without this the target still compiles, but
+      # `appintentsmetadataprocessor` skips extraction ("No AppIntents.framework
+      # dependency found") and none of the intents ever appear in Shortcuts —
+      # a green build that ships nothing.
+      - sdk: AppIntents.framework
+      - target: RepeatWidget
+        embed: true
+      - target: RepeatShareExtension
+        embed: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.goodglor.repeat
+        SWIFT_EMIT_LOC_STRINGS: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_CFBundleDisplayName: Repeat
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+    info:
+      path: Repeat/Info.plist
+      properties:
+        # Required, and NOT supplied by the INFOPLIST_KEY_* settings above: those
+        # only apply when Xcode generates the plist, and this target ships an
+        # explicit one. Without UILaunchScreen, iOS runs the app letterboxed in
+        # compatibility mode — the whole UI rendered into a smaller rectangle with
+        # black bars, on every device.
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        CFBundleURLTypes:
+          - CFBundleURLName: com.goodglor.repeat.deeplink
+            CFBundleURLSchemes: [repeat]
+        UIBackgroundModes: [fetch, processing]
+        BGTaskSchedulerPermittedIdentifiers: [com.goodglor.repeat.refresh]
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        ITSAppUsesNonExemptEncryption: false
+
+  RepeatWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: RepeatWidget
+      - path: Repeat/Shared
+    entitlements:
+      path: RepeatWidget/RepeatWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.goodglor.repeat
+    dependencies:
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.goodglor.repeat.widget
+        SKIP_INSTALL: YES
+    info:
+      path: RepeatWidget/Info.plist
+      properties:
+        CFBundleDisplayName: Repeat
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+
+  RepeatShareExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: RepeatShareExtension
+      - path: Repeat/Shared
+    entitlements:
+      path: RepeatShareExtension/RepeatShareExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.goodglor.repeat
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.goodglor.repeat.share
+        SKIP_INSTALL: YES
+    info:
+      path: RepeatShareExtension/Info.plist
+      properties:
+        CFBundleDisplayName: Add to Repeat
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsText: true
+              NSExtensionActivationSupportsWebURLWithMaxCount: 1
+              NSExtensionActivationSupportsWebPageWithMaxCount: 1
+
+  RepeatUITests:
+    # #39. A separate process driving the real app — the only kind of test that
+    # can prove a session is completable, since every unit test in this repo calls
+    # the session directly and never touches a button.
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/RepeatUITests
+    dependencies:
+      - target: Repeat
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.goodglor.repeat.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Repeat
+
+  RepeatTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/RepeatTests
+    dependencies:
+      - target: Repeat
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.goodglor.repeat.tests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  Repeat:
+    build:
+      targets:
+        Repeat: all
+        RepeatWidget: all
+        RepeatShareExtension: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      # #38: the app's primary language is Ukrainian, and its copy is what the
+      # tests assert. Without this the host resolves the Mac's language — English
+      # — and every test naming a user-facing string fails, which is the string
+      # catalogue working correctly rather than a regression. Tests that check the
+      # English fallback ask for the `en` bundle explicitly.
+      language: uk
+      region: UA
+      targets: [RepeatTests, RepeatUITests]
+    archive:
+      config: Release

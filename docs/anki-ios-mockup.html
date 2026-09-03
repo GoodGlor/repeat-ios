@@ -1,0 +1,432 @@
+<!doctype html>
+<!--
+  SUPERSEDED — 2026-09-02, card #89.
+
+  This mockup was the design reference the app was built against, and `Palette`
+  was lifted from the `:root` block below so the two could not drift apart.
+
+  They have now drifted deliberately. The owner asked for a warmer, more app-like
+  look than this describes, and #89 changed the things this file still shows:
+  the rating buttons are solid rather than four pale chips, surfaces are elevated
+  rather than flat, Home's hero is a green gradient rather than the near-black
+  `--ink`, and the study card carries the deck it came from.
+
+  The colours here are also pre-#37: `--hard: #C98A1E` measured 2.50:1 against
+  its own background, below even the large-text floor. Do not copy a value out of
+  this file. `Repeat/Theme/Palette.swift` is the design, and
+  `Tests/RepeatTests/AccessibilityTests.swift` is what holds it to account.
+
+  Kept rather than deleted because it is the record of what the app looked like
+  for its first forty cards, and #89's rationale only reads as an argument next
+  to the thing it is arguing with.
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Repeat — дизайн застосунку</title>
+<style>
+  :root{
+    --bg:#EEF1EC;
+    --paper:#FFFFFF;
+    --ink:#17211B;
+    --ink-2:#5F6B64;
+    --line:#DDE3DC;
+    --accent:#1F7A5C;
+    --accent-soft:#DFF0E8;
+    --again:#C94D3F; --again-soft:#F8E3E0;
+    --hard:#C98A1E;  --hard-soft:#FAEBCF;
+    --good:#1F7A5C;  --good-soft:#DFF0E8;
+    --easy:#3A6EA5;  --easy-soft:#DFEAF6;
+    --r:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:#D9DED6;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    display:flex;align-items:center;justify-content:center;
+    min-height:100vh;
+  }
+  .phone{
+    width:min(100vw,390px);height:min(100vh,844px);
+    background:var(--bg);position:relative;overflow:hidden;
+    border-radius:0;
+  }
+  @media (min-width:420px) and (min-height:900px){
+    .phone{border-radius:48px;box-shadow:0 30px 80px rgba(0,0,0,.25);border:10px solid #111}
+  }
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;padding:56px 22px 0}
+  .screen.on{display:flex}
+  .fill{flex:1;min-height:0}
+  h1{font-size:30px;line-height:1.1;letter-spacing:-.02em;font-weight:700}
+  h2{font-size:22px;letter-spacing:-.01em;font-weight:700}
+  p{font-size:16px;line-height:1.45;color:var(--ink-2)}
+  .btn{
+    display:block;width:100%;border:0;border-radius:16px;padding:17px;
+    font:inherit;font-size:17px;font-weight:600;cursor:pointer;
+    background:var(--accent);color:#fff;
+  }
+  .btn.ghost{background:transparent;color:var(--ink-2);font-weight:500;padding:12px}
+  .btn:active{transform:scale(.985)}
+  .btn:focus-visible,.card:focus-visible,.rate button:focus-visible{outline:3px solid var(--easy);outline-offset:2px}
+
+  /* ---------- onboarding ---------- */
+  .ob .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .dots{display:flex;gap:6px}
+  .dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:width .25s,background .25s}
+  .dots i.cur{width:22px;background:var(--ink)}
+  .skip{font-size:15px;color:var(--ink-2);background:none;border:0;font:inherit;cursor:pointer}
+  .ob-stage{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+  .ob h1{margin-bottom:10px}
+  .ob p{margin-bottom:28px;max-width:32ch}
+  .ob .btn{margin-bottom:34px}
+
+  /* demo card in onboarding */
+  .demo{width:100%;max-width:300px;position:relative}
+  .demo .card{cursor:default}
+  .demo .rate{margin-top:14px}
+  .demo .rate button{pointer-events:none}
+  .hint{
+    position:absolute;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:#fff;font-size:13px;padding:6px 10px;border-radius:9px;
+    white-space:nowrap;
+  }
+  .hint::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--ink)}
+  .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;width:100%;max-width:300px}
+  .calendar b{
+    aspect-ratio:1;border-radius:10px;background:var(--paper);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--ink-2)
+  }
+  .calendar b.done{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .calendar b.today{border:2px solid var(--ink);color:var(--ink)}
+
+  /* ---------- card ---------- */
+  .card{
+    background:var(--paper);border-radius:22px;padding:28px 24px;
+    box-shadow:0 1px 0 rgba(23,33,27,.05),0 12px 30px -18px rgba(23,33,27,.35);
+    display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
+    cursor:pointer;position:relative;
+  }
+  .card .q{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+  .card .a{font-size:24px;font-weight:600;color:var(--accent);margin-top:22px;padding-top:22px;border-top:1px solid var(--line);width:100%;line-height:1.2}
+  .card .a small{display:block;font-size:15px;font-weight:400;color:var(--ink-2);margin-top:8px}
+  .card .tap{position:absolute;bottom:16px;left:0;right:0;font-size:13px;color:var(--ink-2)}
+  .card[data-flipped="false"] .a{display:none}
+  .card[data-flipped="true"] .tap{display:none}
+
+  .rate{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .rate button{
+    border:0;border-radius:14px;padding:12px 4px 10px;font:inherit;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+  }
+  .rate button b{font-size:15px;font-weight:600}
+  .rate button span{font-size:12px;opacity:.8}
+  .rate .again{background:var(--again-soft);color:var(--again)}
+  .rate .hard {background:var(--hard-soft); color:var(--hard)}
+  .rate .good {background:var(--good-soft); color:var(--good)}
+  .rate .easy {background:var(--easy-soft); color:var(--easy)}
+  .rate button:active{filter:brightness(.95);transform:scale(.97)}
+
+  /* ---------- home ---------- */
+  .home .greet{font-size:15px;color:var(--ink-2);margin-bottom:4px}
+  .today{
+    background:var(--ink);color:#fff;border-radius:22px;padding:22px 22px 20px;margin:18px 0 22px;
+  }
+  .today .n{font-size:64px;font-weight:700;letter-spacing:-.04em;line-height:1}
+  .today .l{font-size:15px;opacity:.75;margin-top:2px}
+  .today .btn{background:#fff;color:var(--ink);margin-top:18px}
+  .today.zero{background:var(--accent-soft);color:var(--ink)}
+  .today.zero .l{opacity:1;color:var(--ink-2)}
+  .today.zero .btn{background:var(--paper)}
+  .sec{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+  .sec h2{font-size:17px}
+  .sec a{font-size:15px;color:var(--accent);text-decoration:none}
+  .decks{display:flex;flex-direction:column;gap:8px;overflow:auto;padding-bottom:16px}
+  .deck{
+    background:var(--paper);border-radius:16px;padding:14px 16px;
+    display:flex;align-items:center;gap:14px;cursor:pointer;
+  }
+  .deck .sw{width:10px;height:38px;border-radius:5px;flex:none}
+  .deck .t{flex:1;min-width:0}
+  .deck .t b{display:block;font-size:16px;font-weight:600}
+  .deck .t span{font-size:13px;color:var(--ink-2)}
+  .deck .due{font-size:15px;font-weight:600;background:var(--accent-soft);color:var(--accent);padding:5px 10px;border-radius:9px}
+  .deck .due.none{background:transparent;color:var(--ink-2);font-weight:500}
+
+  /* ---------- tab bar ---------- */
+  .tabs{
+    flex:none;display:grid;grid-template-columns:1fr 1fr 1fr;
+    border-top:1px solid var(--line);margin:0 -22px;padding:10px 0 26px;background:var(--bg);
+  }
+  .tabs button{background:none;border:0;font:inherit;font-size:12px;color:var(--ink-2);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .tabs button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .tabs button.cur{color:var(--ink);font-weight:600}
+
+  /* ---------- study ---------- */
+  .study .bar{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .study .bar .x{background:none;border:0;font:inherit;font-size:22px;color:var(--ink-2);cursor:pointer;line-height:1}
+  .prog{flex:1;height:5px;background:var(--line);border-radius:3px;overflow:hidden}
+  .prog i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .3s}
+  .study .cnt{font-size:14px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .study .card{flex:1;min-height:0;margin-bottom:14px}
+  .study .rate{margin-bottom:34px}
+  .study .rate[data-hidden="true"]{visibility:hidden}
+
+  /* ---------- done ---------- */
+  .done{align-items:center;text-align:center;justify-content:center}
+  .done .big{width:96px;height:96px;border-radius:50%;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;margin-bottom:22px}
+  .done .big svg{width:44px;height:44px;stroke:var(--accent);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+  .done h1{margin-bottom:8px}
+  .done p{margin-bottom:28px}
+  .stats{display:flex;gap:8px;width:100%;margin-bottom:28px}
+  .stats div{flex:1;background:var(--paper);border-radius:14px;padding:12px}
+  .stats b{display:block;font-size:22px;font-weight:700;letter-spacing:-.02em}
+  .stats span{font-size:12px;color:var(--ink-2)}
+
+  /* ---------- add ---------- */
+  .add label{display:block;font-size:13px;color:var(--ink-2);margin:0 0 6px 4px}
+  .add .field{
+    width:100%;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px;
+    font:inherit;font-size:17px;color:var(--ink);resize:none;margin-bottom:16px;min-height:88px;
+  }
+  .add .field:focus{outline:2px solid var(--accent);border-color:transparent}
+  .add .pick{display:flex;gap:8px;overflow:auto;padding-bottom:6px;margin-bottom:16px}
+  .add .pick button{flex:none;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;cursor:pointer}
+  .add .pick button.cur{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .toast{
+    position:absolute;left:22px;right:22px;bottom:110px;background:var(--ink);color:#fff;
+    padding:12px 16px;border-radius:14px;font-size:15px;text-align:center;
+    opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:none}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- ONBOARDING 1 -->
+  <section class="screen ob on" id="ob1">
+    <div class="top">
+      <div class="dots"><i class="cur"></i><i></i><i></i></div>
+      <button class="skip" onclick="go('home')">Пропустити</button>
+    </div>
+    <div class="ob-stage">
+      <div class="demo">
+        <div class="hint" style="top:-38px">Спочатку спробуй згадати сам</div>
+        <div class="card" data-flipped="true">
+          <div class="q">ubiquitous</div>
+          <div class="a">повсюдний<small>The app became ubiquitous within a year.</small></div>
+        </div>
+      </div>
+    </div>
+    <h1>Тут не вчать. Тут згадують.</h1>
+    <p>Бачиш питання — згадуєш відповідь — торкаєшся картки, щоб перевірити. Саме зусилля згадати і закріплює памʼять.</p>
+    <button class="btn" onclick="go('ob2')">Далі</button>
+  </section>
+
+  <!-- ONBOARDING 2 -->
+  <section class="screen ob" id="ob2">
+    <div class="top">
+      <div class="dots"><i></i><i class="cur"></i><i></i></div>
+      <button class="skip" onclick="go('home')">Пропустити</button>
+    </div>
+    <div class="ob-stage">
+      <div class="demo">
+        <div class="card" data-flipped="true" style="padding:22px">
+          <div class="q" style="font-size:22px">ubiquitous</div>
+          <div class="a" style="font-size:19px;margin-top:14px;padding-top:14px">повсюдний</div>
+        </div>
+        <div class="rate">
+          <button class="again"><b>Знову</b><span>1 хв</span></button>
+          <button class="hard"><b>Важко</b><span>10 хв</span></button>
+          <button class="good"><b>Добре</b><span>1 д</span></button>
+          <button class="easy"><b>Легко</b><span>4 д</span></button>
+        </div>
+        <div class="hint" style="bottom:-46px">Під кнопкою — коли картка повернеться</div>
+      </div>
+    </div>
+    <h1>Чесно оціни, як згадалось</h1>
+    <p>Не згадав — «Знову». Згадав легко — «Легко». Далі застосунок сам вирішує, коли показати картку наступного разу.</p>
+    <button class="btn" onclick="go('ob3')">Далі</button>
+  </section>
+
+  <!-- ONBOARDING 3 -->
+  <section class="screen ob" id="ob3">
+    <div class="top">
+      <div class="dots"><i></i><i></i><i class="cur"></i></div>
+      <button class="skip" onclick="go('home')">Пропустити</button>
+    </div>
+    <div class="ob-stage">
+      <div class="calendar" aria-hidden="true">
+        <b class="done">пн</b><b class="done">вт</b><b class="done">ср</b><b class="done">чт</b><b class="done">пт</b><b class="done">сб</b><b class="done">нд</b>
+        <b class="done">пн</b><b class="done">вт</b><b class="done">ср</b><b class="today">чт</b><b>пт</b><b>сб</b><b>нд</b>
+      </div>
+    </div>
+    <h1>10 хвилин щодня</h1>
+    <p>Картки, які ти забуваєш, приходитимуть частіше; ті, що знаєш — рідше. Головне — не пропускати дні: пропуски накопичують борг.</p>
+    <button class="btn" onclick="go('home')">Почати</button>
+  </section>
+
+  <!-- HOME -->
+  <section class="screen home" id="home">
+    <div class="greet" id="greet">Добрий день, Тема</div>
+    <h1>Сьогодні</h1>
+    <div class="today" id="today">
+      <div class="n" id="dueN">23</div>
+      <div class="l">картки до повторення · ≈ 8 хв</div>
+      <button class="btn" onclick="startStudy()">Почати повторення</button>
+    </div>
+    <div class="sec"><h2>Колоди</h2><a href="#" onclick="go('add');return false">Нова картка</a></div>
+    <div class="decks fill">
+      <div class="deck" onclick="startStudy()"><i class="sw" style="background:#1F7A5C"></i><div class="t"><b>English words</b><span>412 карток · 15 нових</span></div><span class="due">14</span></div>
+      <div class="deck" onclick="startStudy()"><i class="sw" style="background:#3A6EA5"></i><div class="t"><b>Swift і iOS</b><span>96 карток</span></div><span class="due">9</span></div>
+      <div class="deck"><i class="sw" style="background:#C98A1E"></i><div class="t"><b>Столиці світу</b><span>195 карток</span></div><span class="due none">завтра</span></div>
+    </div>
+    <nav class="tabs">
+      <button class="cur" onclick="go('home')"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 3v4M17 3v4"/></svg>Колоди</button>
+      <button onclick="go('add')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Додати</button>
+      <button onclick="toast('Статистика — наступний екран')"><svg viewBox="0 0 24 24"><path d="M4 19V10M10 19V5M16 19v-8M22 19H2"/></svg>Статистика</button>
+    </nav>
+  </section>
+
+  <!-- STUDY -->
+  <section class="screen study" id="study">
+    <div class="bar">
+      <button class="x" onclick="go('home')" aria-label="Закрити">×</button>
+      <div class="prog"><i id="prog" style="width:0%"></i></div>
+      <span class="cnt" id="cnt">1 / 23</span>
+    </div>
+    <div class="card" id="card" data-flipped="false" tabindex="0" onclick="flip()">
+      <div class="q" id="q"></div>
+      <div class="a" id="a"></div>
+      <div class="tap">Торкнись, щоб перевірити</div>
+    </div>
+    <div class="rate" id="rate" data-hidden="true">
+      <button class="again" onclick="rate('again')"><b>Знову</b><span>1 хв</span></button>
+      <button class="hard" onclick="rate('hard')"><b>Важко</b><span>10 хв</span></button>
+      <button class="good" onclick="rate('good')"><b>Добре</b><span id="ivGood">1 д</span></button>
+      <button class="easy" onclick="rate('easy')"><b>Легко</b><span id="ivEasy">4 д</span></button>
+    </div>
+  </section>
+
+  <!-- DONE -->
+  <section class="screen done" id="done">
+    <div class="fill"></div>
+    <div class="big"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+    <h1>На сьогодні все</h1>
+    <p>Наступні картки зʼявляться завтра вранці.</p>
+    <div class="stats">
+      <div><b id="sDone">23</b><span>повторено</span></div>
+      <div><b id="sAgain">3</b><span>забуто</span></div>
+      <div><b>11</b><span>днів поспіль</span></div>
+    </div>
+    <button class="btn" onclick="finish()">До колод</button>
+    <button class="btn ghost" onclick="go('add')">Додати нові картки</button>
+    <div class="fill"></div>
+  </section>
+
+  <!-- ADD -->
+  <section class="screen add" id="add">
+    <h1 style="margin-bottom:18px">Нова картка</h1>
+    <div class="pick">
+      <button class="cur">English words</button><button>Swift і iOS</button><button>Столиці світу</button><button>+ Нова колода</button>
+    </div>
+    <label for="f1">Питання</label>
+    <textarea class="field" id="f1" placeholder="Наприклад: reluctant"></textarea>
+    <label for="f2">Відповідь</label>
+    <textarea class="field" id="f2" placeholder="Наприклад: неохочий, той, що не хоче"></textarea>
+    <button class="btn" onclick="saveCard()">Зберегти й додати ще</button>
+    <button class="btn ghost" onclick="go('home')">Готово</button>
+    <div class="fill"></div>
+    <nav class="tabs">
+      <button onclick="go('home')"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 3v4M17 3v4"/></svg>Колоди</button>
+      <button class="cur"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Додати</button>
+      <button onclick="toast('Статистика — наступний екран')"><svg viewBox="0 0 24 24"><path d="M4 19V10M10 19V5M16 19v-8M22 19H2"/></svg>Статистика</button>
+    </nav>
+  </section>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+  const cards = [
+    {q:"reluctant", a:"неохочий", ex:"He was reluctant to admit the mistake."},
+    {q:"Що таке @MainActor?", a:"Актор, чий код виконується в головному потоці", ex:"Потрібен для оновлення UI"},
+    {q:"thorough", a:"ретельний", ex:"She did a thorough review of the code."},
+    {q:"Різниця між struct і class у Swift", a:"struct — value type, class — reference type", ex:"struct копіюється при присвоєнні"},
+    {q:"inevitable", a:"неминучий", ex:"Bugs are inevitable; crashes are not."},
+  ];
+  const total = 23;
+  let i = 0, again = 0, curCard = null;
+
+  function go(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+    document.getElementById(id).classList.add('on');
+  }
+  function startStudy(){ i=0; again=0; next(); go('study'); }
+  function next(){
+    if(i>=total){ showDone(); return; }
+    curCard = cards[i % cards.length];
+    const c = document.getElementById('card');
+    c.dataset.flipped = 'false';
+    document.getElementById('q').textContent = curCard.q;
+    document.getElementById('a').innerHTML = curCard.a + '<small>'+curCard.ex+'</small>';
+    document.getElementById('rate').dataset.hidden = 'true';
+    document.getElementById('cnt').textContent = (i+1)+' / '+total;
+    document.getElementById('prog').style.width = (i/total*100)+'%';
+    // fake interval preview grows with card "age"
+    const g = [1,3,7,16,30][i%5], e=[4,8,18,40,75][i%5];
+    document.getElementById('ivGood').textContent = g+' д';
+    document.getElementById('ivEasy').textContent = e+' д';
+  }
+  function flip(){
+    const c = document.getElementById('card');
+    if(c.dataset.flipped==='true') return;
+    c.dataset.flipped='true';
+    document.getElementById('rate').dataset.hidden='false';
+  }
+  function rate(r){
+    if(document.getElementById('card').dataset.flipped!=='true') return;
+    if(r==='again') again++;
+    i++;
+    if(i>=6){ showDone(); return; } // shortened demo session
+    next();
+  }
+  function showDone(){
+    document.getElementById('sDone').textContent = i;
+    document.getElementById('sAgain').textContent = again;
+    go('done');
+  }
+  function finish(){
+    const t = document.getElementById('today');
+    t.classList.add('zero');
+    document.getElementById('dueN').textContent = '0';
+    t.querySelector('.l').textContent = 'Усе повторено. До завтра!';
+    t.querySelector('.btn').textContent = 'Повторити ще раз';
+    document.querySelectorAll('.deck .due').forEach(d=>{d.textContent='завтра';d.classList.add('none')});
+    go('home');
+  }
+  function saveCard(){
+    const f1=document.getElementById('f1'), f2=document.getElementById('f2');
+    if(!f1.value.trim()||!f2.value.trim()){ toast('Заповни питання і відповідь'); return; }
+    f1.value=''; f2.value=''; f1.focus();
+    toast('Збережено. Зʼявиться в сьогоднішніх нових');
+  }
+  let tt;
+  function toast(msg){
+    const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+    clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),1800);
+  }
+  document.addEventListener('keydown',e=>{
+    if(!document.getElementById('study').classList.contains('on')) return;
+    if(e.key===' '){ e.preventDefault(); flip(); }
+    if(['1','2','3','4'].includes(e.key)) rate(['again','hard','good','easy'][+e.key-1]);
+  });
+</script>
+</body>
+</html>
