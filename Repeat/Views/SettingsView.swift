@@ -12,6 +12,15 @@ struct SettingsView: View {
     @Bindable var app: AppSettings
     var onReplayOnboarding: () -> Void
 
+    /// #21's per-deck allowance, listed here because it is the number that decides
+    /// how many new cards a day actually arrive — see `newCards`.
+    @Query private var decks: [Deck]
+    /// #112's two inputs: freezes earned come from the log, freezes spent are
+    /// the rows. Both as queries, so the count corrects itself the moment one is
+    /// spent rather than at the next time this screen is opened.
+    @Query private var logs: [ReviewLog]
+    @Query private var freezes: [StreakFreeze]
+
     @State private var anthropicKey = ""
     @State private var storedAnthropicKey: String?
     @State private var confirmingRedownload = false
@@ -38,8 +47,10 @@ struct SettingsView: View {
                 GoogleConnectionView(settings: settings)
                 googleActions
                 appearance
+                newCards
                 scheduling
                 reminder
+                streak
                 autofill
                 BackupSettingsView(app: app)
                 general
@@ -69,6 +80,64 @@ struct SettingsView: View {
             .sheet(item: $exportURL) { url in
                 ShareLink(item: url) { Text("Поділитися базою") }
                     .presentationDetents([.medium])
+            }
+        }
+    }
+
+    // MARK: - New cards
+
+    /// The decks Settings offers a daily allowance for, in Home's order.
+    ///
+    /// `sortOrder` then `sheetTitle`, the same two keys Home and `DeckSettings.move`
+    /// use — decks arriving from a new tab all start at `sortOrder` 0, so ties are
+    /// ordinary rather than exotic, and a list that ordered them arbitrarily would
+    /// reshuffle itself between launches.
+    ///
+    /// A deck whose tab is gone is kept for 30 days so it can be recovered (§4.3),
+    /// but it has no queue: a stepper for it would set a number nothing reads.
+    static func deckRows(_ decks: [Deck]) -> [Deck] {
+        decks
+            .filter { $0.deletedAt == nil }
+            .sorted { ($0.sortOrder, $0.sheetTitle) < ($1.sortOrder, $1.sheetTitle) }
+    }
+
+    /// One stepper per deck, then the ceiling that applies across all of them.
+    ///
+    /// The order is the point. `QueueBuilder.plan` takes each deck's own allowance
+    /// first and only then trims the total, so the ceiling can lower a day but
+    /// never raise one — a single deck left at its default of 15 gives 15 whatever
+    /// this section's last row says. That is not obvious from a screen showing only
+    /// the ceiling, and the per-deck value lived behind a swipe on Home, so the two
+    /// numbers now sit together in the order the queue reads them.
+    private var newCards: some View {
+        Section("Нові картки на день") {
+            let rows = Self.deckRows(decks)
+            if rows.isEmpty {
+                Text("Колоди зʼявляться після першої синхронізації з Таблицею.")
+                    .font(.caption)
+                    .foregroundStyle(Palette.ink2)
+            } else {
+                ForEach(rows) { deck in
+                    // `DeckSettings.binding` rather than `@Bindable`: the latter
+                    // mutates the object and never reaches the store, so the value
+                    // was back at 15 after the app was killed.
+                    //
+                    // `sheetTitle` is a `String`, so this is the verbatim overload:
+                    // a deck named "Готово" must not pick up a translation.
+                    Stepper(value: DeckSettings.binding(deck, \.newCardsPerDay, in: context),
+                            in: DeckSettings.newCardsPerDayRange) {
+                        LabeledContent(deck.sheetTitle, value: "\(deck.newCardsPerDay)")
+                    }
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Stepper(value: $app.globalNewCardCap, in: AppSettings.newCardCapRange, step: 5) {
+                    LabeledContent("Стеля на всі колоди", value: "\(app.globalNewCardCap)")
+                }
+                Text("Скільки нових карток за день ви побачите щонайбільше — сумарно з усіх колод. Кожна колода спершу віддає свою норму, і тільки потім працює ця межа.")
+                    .font(.caption)
+                    .foregroundStyle(Palette.ink2)
             }
         }
     }
@@ -152,9 +221,6 @@ struct SettingsView: View {
                 }
             }
 
-            Stepper(value: $app.globalNewCardCap, in: AppSettings.newCardCapRange, step: 5) {
-                LabeledContent("Нових карток на день", value: "\(app.globalNewCardCap)")
-            }
             Stepper(value: $app.leechThreshold, in: AppSettings.leechThresholdRange) {
                 LabeledContent("Поріг «залипань»", value: "\(app.leechThreshold)")
             }
@@ -174,6 +240,27 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Streak (#112)
+
+    /// How many missed days are still survivable.
+    ///
+    /// Shown here rather than on Home because it is a fact about the rules, not
+    /// about today — Home says what to do now, and §2.2 keeps it calm.
+    private var streak: some View {
+        Section("Серія") {
+            LabeledContent("Заморозки", value: "\(freezesAvailable)")
+            Text("Заморозка рятує серію за один пропущений день і витрачається сама. Одна нараховується за кожні 7 днів із повтореннями, і більш ніж дві не накопичуються.")
+                .font(.caption)
+                .foregroundStyle(Palette.ink2)
+        }
+    }
+
+    private var freezesAvailable: Int {
+        let days = Set(logs.filter { $0.rating != 0 }
+            .map { Calendar.current.startOfDay(for: $0.reviewedAt) })
+        return Freeze.available(reviewDays: days, spent: freezes.count)
+    }
+
     // MARK: - Reminder
 
     private var reminder: some View {
@@ -182,13 +269,13 @@ struct SettingsView: View {
                 .onChange(of: app.reminderEnabled) { _, enabled in
                     // Asked when the owner turns it on, not at launch: a
                     // permission prompt before anyone has studied anything is the
-                    // surest way to be refused permanently.
+                    // surest way to be refused permanently. This one toggle
+                    // governs both evening notifications — §5.5's streak reminder
+                    // has no separate switch, so this stays the app's only call
+                    // site of `requestAuthorization`.
                     Task {
                         if enabled { _ = await SystemNotificationScheduler().requestAuthorization() }
-                        await DailyReminder.refresh(
-                            in: context, enabled: app.reminderEnabled,
-                            reminderMinutes: app.reminderMinutes, queueConfig: app.queueConfig
-                        )
+                        await refreshReminders()
                     }
                 }
             if app.reminderEnabled {
@@ -201,15 +288,36 @@ struct SettingsView: View {
                     displayedComponents: .hourAndMinute
                 )
                 .onChange(of: app.reminderMinutes) { _, _ in
-                    Task {
-                        await DailyReminder.refresh(
-                            in: context, enabled: app.reminderEnabled,
-                            reminderMinutes: app.reminderMinutes, queueConfig: app.queueConfig
-                        )
-                    }
+                    Task { await refreshReminders() }
                 }
+
+                DatePicker(
+                    "Час нагадування про серію",
+                    selection: Binding(
+                        get: { Self.date(fromMinutes: app.streakReminderMinutes) },
+                        set: { app.streakReminderMinutes = Self.minutes(from: $0) }
+                    ),
+                    displayedComponents: .hourAndMinute
+                )
+                .onChange(of: app.streakReminderMinutes) { _, _ in
+                    Task { await refreshReminders() }
+                }
+
+                Text("Якщо серія під загрозою, увечері прийде тільки одне нагадування — про неї.")
+                    .font(.caption)
+                    .foregroundStyle(Palette.ink2)
             }
         }
+    }
+
+    /// One place, so the two pickers and the toggle cannot drift apart.
+    private func refreshReminders() async {
+        await EveningReminder.refresh(
+            in: context, enabled: app.reminderEnabled,
+            reminderMinutes: app.reminderMinutes,
+            streakMinutes: app.streakReminderMinutes,
+            queueConfig: app.queueConfig
+        )
     }
 
     // MARK: - Autofill

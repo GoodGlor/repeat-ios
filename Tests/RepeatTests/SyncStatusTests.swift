@@ -201,6 +201,10 @@ final class SyncStatusTests: XCTestCase {
         XCTAssertFalse(NeedsAttention.isEmpty(conflicts: 1, malformedDecks: 0, status: .idle))
         XCTAssertFalse(NeedsAttention.isEmpty(conflicts: 0, malformedDecks: 1, status: .idle))
         XCTAssertFalse(NeedsAttention.isEmpty(conflicts: 0, malformedDecks: 0, status: .notConfigured))
+        // §5.1: a `_meta` value the app refused is a fourth cause. It was being
+        // computed and shown nowhere.
+        XCTAssertFalse(NeedsAttention.isEmpty(conflicts: 0, malformedDecks: 0, status: .idle,
+                                              metaProblems: 1))
         XCTAssertFalse(NeedsAttention.isEmpty(
             conflicts: 0, malformedDecks: 0,
             status: .failed(message: SheetsError.notShared.description, needsAttention: true)))

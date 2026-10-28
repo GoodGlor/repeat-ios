@@ -154,6 +154,17 @@ targets:
     sources:
       - path: RepeatWidget
       - path: Repeat/Shared
+      # #111. The widget's layouts live under `Repeat/` so the app target compiles
+      # them too and `WidgetRenderTests` can host them — see the note atop
+      # `DueCountView.swift`. Listed here rather than folded into `Repeat/Shared`
+      # because the Share Extension also compiles that directory and has no use
+      # for a WidgetKit view.
+      - path: Repeat/WidgetUI
+      # And the catalogue, so the widget's Ukrainian resolves through the same
+      # file the app uses. Without it `String(localized:)` falls back to the key,
+      # which is Ukrainian and therefore looked fine — right up to the plural,
+      # where "1 карток" is wrong in a way a fallback can never fix.
+      - path: Repeat/Resources/Localizable.xcstrings
     entitlements:
       path: RepeatWidget/RepeatWidget.entitlements
       properties:

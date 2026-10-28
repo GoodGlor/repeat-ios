@@ -33,7 +33,7 @@ struct SheetPull {
         self.client = client
     }
 
-    func run(
+    nonisolated(nonsending) func run(
         discovery: DiscoveryResult,
         in context: ModelContext,
         now: Date = .now
@@ -152,6 +152,13 @@ struct SheetPull {
         }
 
         try context.save()
+        // #153: the only place tags change, so the only place the queue's tag
+        // index can go stale. Any content change counts — a row's tags are part
+        // of its content, and telling which changed would cost more than the
+        // rebuild it saves.
+        if result.created + result.contentUpdated + result.softDeleted + result.restored > 0 {
+            TagIndexCache.shared.invalidate()
+        }
         return result
     }
 

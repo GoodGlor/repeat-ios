@@ -48,3 +48,6 @@ Config/Local.xcconfig
 
 # Worktrees created by the worktree-from-card skill
 .claude/worktrees/
+
+# Subagent-driven-development scratch: ledgers, briefs, review packages. Rulings are copied into the PR and the handoff before it is deleted.
+.superpowers/

@@ -161,6 +161,9 @@ final class SheetDiscoveryTests: XCTestCase {
         XCTAssertEqual(result.metaProblems.count, 2)
         XCTAssertTrue(result.metaProblems.contains { $0.contains("fsrs_params") })
         XCTAssertTrue(result.metaProblems.contains { $0.contains("desired_retention") })
+        // They travel with the overrides, which is what the sync actor persists —
+        // a problem that only lived in this result was reported to no one.
+        XCTAssertEqual(result.metaOverrides.problems, result.metaProblems)
         XCTAssertEqual(result.schedulerConfig.weights, SchedulerConfig().weights, "defaults stand")
         XCTAssertEqual(result.schedulerConfig.desiredRetention, 0.90)
         XCTAssertEqual(Array(result.readable.keys), ["Verbs"], "the decks still synced")

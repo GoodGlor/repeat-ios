@@ -23,7 +23,7 @@ struct SheetPush {
         self.client = client
     }
 
-    func run(
+    nonisolated(nonsending) func run(
         discovery: DiscoveryResult,
         in context: ModelContext,
         now: Date = .now

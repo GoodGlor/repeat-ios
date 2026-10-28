@@ -39,12 +39,19 @@ enum Leech {
     }
 
     /// Every leech in the store, worst first.
+    ///
+    /// `isLeech` restated as a predicate, with the soft-delete hops as joins
+    /// (#116). Runs on every Home rebuild; fetching every note and walking
+    /// `note.cards` cost **1.5 s** at ten thousand cards, because the walk is
+    /// one relationship fault per note and the faults come back after every
+    /// fetch — the handoff's SwiftData note, once more.
     static func all(in context: ModelContext, threshold: Int) -> [Card] {
-        let notes = (try? context.fetch(FetchDescriptor<Note>())) ?? []
-        return notes
-            .filter { $0.deletedAt == nil && $0.deck.deletedAt == nil }
-            .flatMap(\.cards)
-            .filter { isLeech($0, threshold: threshold) }
+        let descriptor = FetchDescriptor<Card>(predicate: #Predicate<Card> { card in
+            card.isSuspended && card.lapses >= threshold
+                && card.note.deletedAt == nil
+                && card.note.deck.deletedAt == nil
+        })
+        return ((try? context.fetch(descriptor)) ?? [])
             .sorted { ($0.lapses, $1.id) > ($1.lapses, $0.id) }
     }
 

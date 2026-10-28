@@ -16,10 +16,14 @@ import SwiftUI
 /// below a hairline, and the whole thing is **elevated** so it reads as an object
 /// rather than as a lighter region of the page.
 struct FlashcardFace: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let front: String
     var back: String = ""
     var example: String?
     var extras: [(key: String, value: String)] = []
+    /// #149: shown above the question, on both sides of the reveal — it is part
+    /// of what is being asked.
+    var picture: UIImage?
     var isRevealed: Bool
     /// Shown before the reveal. `nil` for a card that is not tappable.
     ///
@@ -63,6 +67,10 @@ struct FlashcardFace: View {
             // with everything else and float the deck name into the middle of the
             // card.
             VStack(spacing: 0) {
+                if let picture {
+                    pictureView(picture)
+                        .padding(.bottom, 20)
+                }
                 if let gap {
                     gapSentence(gap)
                 } else {
@@ -112,6 +120,29 @@ struct FlashcardFace: View {
         .overlay(shape.strokeBorder(Palette.separator.opacity(0.7), lineWidth: 1))
         .compositingGroup()
         .elevated(.high)
+    }
+
+    // MARK: - Picture
+
+    /// Fitted, never cropped: a picture can carry the detail the question is
+    /// about, and cropping could cut it off. The height is capped so the word
+    /// stays on screen with it; at the accessibility sizes the card scrolls
+    /// (`StudyView`), so nothing is clipped.
+    ///
+    /// Decorative to VoiceOver on its own — the study screen says "з картинкою"
+    /// on the card instead, because the file carries no description to read.
+    ///
+    /// Rounded on the picture itself, not on its frame: a wide picture is
+    /// shorter than the frame, and rounding the frame left its corners square.
+    /// Smaller at the accessibility sizes, where the text needs the room — at
+    /// 240 the revealed answer went below the fold at AX5.
+    private func pictureView(_ image: UIImage) -> some View {
+        Image(uiImage: image)
+            .resizable()
+            .scaledToFit()
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .frame(maxWidth: .infinity, maxHeight: dynamicTypeSize.isAccessibilitySize ? 140 : 240)
+            .accessibilityHidden(true)
     }
 
     // MARK: - Deck identity

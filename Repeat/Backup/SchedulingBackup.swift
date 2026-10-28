@@ -12,7 +12,11 @@ import Scheduling
 struct SchedulingBackup: Codable, Equatable {
     /// Bumped when the shape changes. `decode` refuses a version it does not
     /// know rather than silently restoring garbage onto real scheduling state.
-    static let currentVersion = 1
+    ///
+    /// **2** since #112 added `frozenDays`. The guard below is `<=`, so every
+    /// backup already on disk still restores — it simply restores no freezes,
+    /// which is the truth about a backup taken before they existed.
+    static let currentVersion = 2
 
     struct Entry: Codable, Equatable {
         /// `Card.id` — the Sheet's row id, which is what makes a restore
@@ -27,6 +31,11 @@ struct SchedulingBackup: Codable, Equatable {
     /// array order, and two backups of an unchanged store should be byte
     /// identical.
     var entries: [Entry]
+    /// Days a `StreakFreeze` covers (#112), sorted for the same reason `entries`
+    /// is. Defaulted so a version 1 backup decodes as one with no freezes rather
+    /// than failing — the store is the only copy of scheduling state, and a
+    /// backup that will not open is no backup.
+    var frozenDays: [Date] = []
 
     var cardCount: Int { entries.count }
 
@@ -61,5 +70,23 @@ struct SchedulingBackup: Codable, Equatable {
             throw BackupError.unsupportedVersion(backup.version)
         }
         return backup
+    }
+}
+
+extension SchedulingBackup {
+    /// Written out rather than synthesized, and this is not a style choice: a
+    /// synthesized `init(from:)` **ignores the property's default** and throws
+    /// `keyNotFound` instead. `frozenDays = []` above therefore did nothing for
+    /// the case it exists for, and every backup already on the owner's phone —
+    /// all of them written before #112 — would have failed to open. Caught by
+    /// `testABackupWrittenBeforeFreezesExistedStillOpens`.
+    ///
+    /// In an extension so the memberwise initialiser survives.
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        version = try container.decode(Int.self, forKey: .version)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        entries = try container.decode([Entry].self, forKey: .entries)
+        frozenDays = try container.decodeIfPresent([Date].self, forKey: .frozenDays) ?? []
     }
 }

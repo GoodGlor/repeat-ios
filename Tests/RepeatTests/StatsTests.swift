@@ -244,11 +244,164 @@ final class StatsTests: XCTestCase {
         XCTAssertEqual(StatsSummary.percent(1), "100 %")
     }
 
+    // MARK: - Records and the year
+
+    /// One fetch feeds the streak, the records and the grid; the undo-marker
+    /// filter is applied once, so none of them can disagree about a day.
+    func testRecordsAndTheHeatmapComeFromTheSameLogsAndSkipUndoMarkers() throws {
+        let (context, _) = try makeStore()
+        try log(Grade.good.rawValue, daysAgo: 0, in: context)
+        try log(Grade.good.rawValue, daysAgo: 0, in: context)
+        try log(Grade.again.rawValue, daysAgo: 1, in: context)
+        try log(0, daysAgo: 2, in: context)   // an undo marker on an otherwise empty day
+
+        let summary = StatsSummary.load(from: context, now: now)
+        XCTAssertEqual(summary.records.longestStreak, 2, "today and yesterday; the marker's day does not count")
+        XCTAssertEqual(summary.records.bestDay?.count, 2)
+        XCTAssertEqual(summary.records.bestDay?.start, calendar.startOfDay(for: now))
+        XCTAssertEqual(summary.heatmap.totalReviews, 3)
+        XCTAssertEqual(summary.heatmap.activeDays, 2)
+    }
+
+    /// A five-week break used to turn a year of history into "Ще немає даних":
+    /// the gate looked only at the last 30 days, and the year and the records
+    /// now sit behind it.
+    func testHistoryOlderThanTheWindowStillCountsAsHistory() throws {
+        let (context, _) = try makeStore()
+        try log(Grade.good.rawValue, daysAgo: 45, in: context)
+        let summary = StatsSummary.load(from: context, now: now)
+        XCTAssertEqual(summary.reviewsLast30, 0)
+        XCTAssertEqual(summary.streak, 0)
+        XCTAssertTrue(summary.hasHistory, "one review 45 days ago is history")
+        XCTAssertEqual(summary.records.bestDay?.count, 1)
+    }
+
+    func testUkrainianCardPlurals() {
+        let uk = Locale(identifier: "uk")
+        XCTAssertEqual(StatsSummary.cardCount(1, locale: uk), "1 картка")
+        XCTAssertEqual(StatsSummary.cardCount(3, locale: uk), "3 картки")
+        XCTAssertEqual(StatsSummary.cardCount(10, locale: uk), "10 карток")
+        XCTAssertEqual(StatsSummary.cardCount(70, locale: uk), "70 карток")
+        XCTAssertEqual(StatsSummary.cardCount(201, locale: uk), "201 картка", "21, 31, 201 take the singular")
+    }
+
+    /// The exact text is the locale's; what is pinned is that both ends of the
+    /// week are named. The fixture week (9–15 March 2026) shares no digit with
+    /// its year, so a shifted week or an off-by-one Sunday cannot pass by
+    /// accident — "2027" used to satisfy `contains("7")` on its own.
+    func testAWeekSpanNamesMondayAndSunday() {
+        let current = Calendar.current
+        let monday = current.date(from: DateComponents(year: 2026, month: 3, day: 9))!
+        XCTAssertEqual(current.component(.weekday, from: monday), 2, "9 March 2026 is a Monday")
+        let text = StatsSummary.weekSpan(from: monday, calendar: current)
+        XCTAssertTrue(text.contains("9"), text)
+        XCTAssertTrue(text.contains("15"), text)
+        XCTAssertFalse(text.contains("16"), "the span ends on Sunday, not the next Monday: \(text)")
+    }
+
+    // MARK: - #106: learned this month
+
+    func testTheWordsLearnedThisMonthReachTheSummary() throws {
+        let (context, deck) = try makeStore()
+        let made = try card(dueInDays: 20, in: context, deck: deck, row: 1)
+        made.stability = 30
+        let crossed = calendar.date(byAdding: .day, value: -10, to: now) ?? now
+        let log = try ReviewLog(
+            cardId: made.id, direction: .forward, rating: Grade.good.rawValue, reviewedAt: crossed,
+            elapsedDays: 5, scheduledDays: 30, stateBefore: .review,
+            prevState: CardSchedulingSnapshot(state: .review, stability: 10, lastReview: crossed)
+        )
+        context.insert(log)
+        try context.save()
+
+        let summary = StatsSummary.load(from: context, now: now)
+        XCTAssertEqual(summary.learnedThisMonth.map(\.front), ["f1"])
+        XCTAssertEqual(summary.learnedThisMonth.first?.learnedAt, crossed)
+    }
+
+    func testAMatureCardWithNoCrossingInTheLogIsNotAWordLearnedThisMonth() throws {
+        // The backlog seed's shape: stable cards, and a log that never mentions
+        // them. History, but nothing this list can honestly claim.
+        let (context, deck) = try makeStore()
+        let made = try card(dueInDays: 20, in: context, deck: deck, row: 1)
+        made.stability = 60
+        try log(Grade.good.rawValue, daysAgo: 1, in: context)
+
+        let summary = StatsSummary.load(from: context, now: now)
+        XCTAssertTrue(summary.hasHistory)
+        XCTAssertEqual(summary.learnedThisMonth, [])
+    }
+
+    // MARK: - §5.4: the grid is the ledger
+
+    func testTheGridListsTheWholeCatalogueWithTheLedgersDates() throws {
+        let (context, _) = try makeStore()
+        try log(3, daysAgo: 1, in: context)   // some history, so the section would show
+        let name = "StatsTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: name)!
+        defaults.removePersistentDomain(forName: name)
+        let ledger = AchievementLedger(defaults: defaults)
+        let earned = calendar.date(byAdding: .day, value: -3, to: now)!
+        ledger.markShown([.firstSession, .reviews100], on: earned)
+
+        let summary = StatsSummary.load(from: context, now: now, calendar: calendar, ledger: ledger)
+
+        XCTAssertEqual(summary.achievements.map(\.badge), Achievements.Badge.allCases, "every badge, catalogue order")
+        XCTAssertEqual(summary.achievements.first { $0.badge == .firstSession }?.earnedOn, earned)
+        XCTAssertNil(summary.achievements.first { $0.badge == .streak7 }?.earnedOn)
+        XCTAssertEqual(summary.earnedCount, 2)
+    }
+
     // MARK: - The acceptance criterion
 
     /// §6.5: "renders in under 300 ms with 10k cards". Measured on the
     /// computation, which is the part that scales — the view draws a fixed
     /// number of bars and rows however many cards there are.
+    /// #136 folded `reviewsLast7`, `reviewsLast30` and `retention` into one walk
+    /// of the log, and left the three single-question functions in place because
+    /// the tests drive them directly and they read clearly. That is only honest
+    /// while the two agree, which is what this asserts — including the cases where
+    /// a hand-merged loop goes wrong: an undo marker, a review exactly on the
+    /// boundary, and a window with nothing in it.
+    func testTheCombinedWalkAgreesWithTheThreeSeparateOnes() throws {
+        let (context, _) = try makeStore()
+        func log(_ rating: Int, daysAgo: Int) throws {
+            context.insert(try ReviewLog(
+                cardId: "c-\(daysAgo)-\(rating)-\(UUID().uuidString)", direction: .forward,
+                rating: rating,
+                reviewedAt: calendar.date(byAdding: .day, value: -daysAgo, to: now) ?? now,
+                elapsedDays: 1, scheduledDays: 1, stateBefore: .review,
+                prevState: CardSchedulingSnapshot()))
+        }
+
+        // Empty first: retention has no answer, and both must say so.
+        let empty = StatsSummary.window([], now: now, calendar: calendar)
+        XCTAssertEqual(empty.last7, StatsSummary.countReviews([], days: 7, now: now, calendar: calendar))
+        XCTAssertNil(empty.retention)
+        XCTAssertNil(StatsSummary.retention([], now: now, calendar: calendar))
+
+        try log(Grade.good.rawValue, daysAgo: 0)
+        try log(Grade.again.rawValue, daysAgo: 3)
+        try log(Grade.easy.rawValue, daysAgo: 7)      // exactly on the 7-day edge
+        try log(Grade.hard.rawValue, daysAgo: 29)
+        try log(Grade.good.rawValue, daysAgo: 30)     // exactly on the 30-day edge
+        try log(Grade.good.rawValue, daysAgo: 45)     // outside both
+        try log(0, daysAgo: 1)                        // an undo marker, never a review
+        try context.save()
+
+        let logs = try context.fetch(FetchDescriptor<ReviewLog>())
+        let combined = StatsSummary.window(logs, now: now, calendar: calendar)
+
+        XCTAssertEqual(combined.last7,
+                       StatsSummary.countReviews(logs, days: 7, now: now, calendar: calendar))
+        XCTAssertEqual(combined.last30,
+                       StatsSummary.countReviews(logs, days: StatsSummary.retentionWindowDays,
+                                                 now: now, calendar: calendar))
+        XCTAssertEqual(combined.retention,
+                       StatsSummary.retention(logs, now: now, calendar: calendar))
+        XCTAssertNotNil(combined.retention, "the fixture has reviews in the window")
+    }
+
     func testTenThousandCardsComputeWellUnderTheBudget() throws {
         let (context, deck) = try makeStore()
         for row in 0..<10_000 {
@@ -259,6 +412,44 @@ final class StatsTests: XCTestCase {
             made.due = calendar.date(byAdding: .day, value: row % 30 - 5, to: now) ?? now
             made.lastReview = now
             made.reps = 3
+
+            // #106: a heavy but realistic month. Every third card is known
+            // (3,334 cards); of those, 200 crossed this month with one real
+            // log each, about 1,470 crossed long ago and were reviewed again
+            // since (two logs to decode before `becameKnown` gives up on this
+            // month), and the rest have no log at all — `becameKnown` returns
+            // nil at no cost.
+            if row % 50 == 0 {
+                made.stability = 30
+                context.insert(try ReviewLog(
+                    cardId: made.id, direction: made.direction, rating: Grade.good.rawValue,
+                    reviewedAt: calendar.date(byAdding: .day, value: -5, to: now) ?? now,
+                    elapsedDays: 1, scheduledDays: 1, stateBefore: .review,
+                    prevState: CardSchedulingSnapshot(state: .review, stability: 10,
+                                                      lastReview: calendar.date(byAdding: .day, value: -6, to: now) ?? now),
+                    uploaded: true
+                ))
+            } else if row % 6 == 0 {
+                made.stability = 30
+                context.insert(try ReviewLog(
+                    cardId: made.id, direction: made.direction, rating: Grade.good.rawValue,
+                    reviewedAt: calendar.date(byAdding: .day, value: -60, to: now) ?? now,
+                    elapsedDays: 1, scheduledDays: 1, stateBefore: .review,
+                    prevState: CardSchedulingSnapshot(state: .review, stability: 10,
+                                                      lastReview: calendar.date(byAdding: .day, value: -61, to: now) ?? now),
+                    uploaded: true
+                ))
+                context.insert(try ReviewLog(
+                    cardId: made.id, direction: made.direction, rating: Grade.good.rawValue,
+                    reviewedAt: calendar.date(byAdding: .day, value: -3, to: now) ?? now,
+                    elapsedDays: 1, scheduledDays: 1, stateBefore: .review,
+                    prevState: CardSchedulingSnapshot(state: .review, stability: 25,
+                                                      lastReview: calendar.date(byAdding: .day, value: -4, to: now) ?? now),
+                    uploaded: true
+                ))
+            } else if row % 3 == 0 {
+                made.stability = 30
+            }
         }
         for index in 0..<2_000 {
             context.insert(try ReviewLog(
@@ -276,5 +467,7 @@ final class StatsTests: XCTestCase {
 
         XCTAssertEqual(summary.decks.first?.total, 10_000)
         XCTAssertLessThan(elapsed, 0.3, "§6.5 asks for under 300 ms with 10k cards")
+        XCTAssertEqual(summary.learnedThisMonth.count, 200, "the fixture's 200 crossings this month")
+        print("MEASURED stats load, 10k cards, 200 words this month: \(String(format: "%.3f", elapsed))s (budget 0.300s)")
     }
 }

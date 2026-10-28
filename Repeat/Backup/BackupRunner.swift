@@ -30,7 +30,10 @@ enum BackupRunner {
         let entries = cards
             .map { SchedulingBackup.Entry(id: $0.id, scheduling: $0.snapshot) }
             .sorted { $0.id < $1.id }
-        return SchedulingBackup(createdAt: now, entries: entries)
+        // #112: the one piece of state a rebuild from `_log` could not put back,
+        // so it is the one piece that has to be in here.
+        let frozen = Freeze.days(in: context).sorted()
+        return SchedulingBackup(createdAt: now, entries: entries, frozenDays: frozen)
     }
 
     /// Writes today's backup and prunes to the newest seven.
@@ -97,6 +100,16 @@ enum BackupRunner {
             card.restore(from: entry.scheduling)
             restored += 1
         }
+
+        // #112. Freezes in the backup are put back if they are gone; freezes
+        // spent since it was taken are left alone. That is the same choice
+        // `untouched` already makes for cards added since — a restore rewinds
+        // what it has a record of and destroys nothing it does not.
+        let alreadyFrozen = Freeze.days(in: context)
+        for day in backup.frozenDays where !alreadyFrozen.contains(day) {
+            context.insert(StreakFreeze(day: day, spentAt: backup.createdAt))
+        }
+
         try context.save()
         return RestoreReport(restored: restored, missing: missing, untouched: byId.count)
     }

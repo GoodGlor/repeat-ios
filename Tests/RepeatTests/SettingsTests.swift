@@ -73,10 +73,64 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(app.schedulerConfig.weights, SchedulerConfig().weights)
     }
 
+    /// The overrides blob every device already holds has no `problems` key. A
+    /// synthesized decoder would throw on it, and `load` would answer with empty
+    /// overrides — the Sheet's retention and weights gone until the next sync.
+    func testAnOverridesBlobWrittenBeforeProblemsExistedStillDecodes() throws {
+        let store = defaults()
+        let old = try JSONEncoder().encode(["retention": 0.92])
+        store.set(old, forKey: SchedulingOverrides.key)
+
+        let loaded = SchedulingOverrides.load(defaults: store)
+        XCTAssertEqual(loaded.retention, 0.92)
+        XCTAssertEqual(loaded.problems, [])
+    }
+
+    /// §5.1: a refused `_meta` value reaches Home, and survives a relaunch, and
+    /// is cleared by the next sync that applies cleanly.
+    func testRefusedMetaValuesArePersistedWithTheOverrides() {
+        let store = defaults()
+        SchedulingOverrides(retention: nil, weights: nil,
+                            problems: ["fsrs_params: 20 numbers"]).save(defaults: store)
+        let app = AppSettings(defaults: store)
+        XCTAssertEqual(app.overrides.problems, ["fsrs_params: 20 numbers"])
+
+        SchedulingOverrides(retention: 0.9, weights: nil).save(defaults: store)
+        app.refreshOverrides()
+        XCTAssertEqual(app.overrides.problems, [])
+    }
+
     func testTheNewCardCapReachesTheQueueBuilder() {
         let app = AppSettings(defaults: defaults())
         app.globalNewCardCap = 7
         XCTAssertEqual(app.queueConfig.globalNewCardCap, 7)
+    }
+
+    // MARK: - The per-deck allowance, on the Settings screen
+
+    /// The value that actually decides how many new cards a day arrive is the
+    /// deck's, not the global ceiling — so Settings lists the decks. The order has
+    /// to be Home's, or the same three decks read as a different three lists.
+    func testSettingsListsLiveDecksInHomesOrder() {
+        let verbs = Deck(sheetTitle: "Дієслова", sheetId: 1, sortOrder: 0)
+        let phrases = Deck(sheetTitle: "Фрази", sheetId: 2, sortOrder: 1)
+        // Decks arriving from a new tab all start at sortOrder 0, so ties are
+        // ordinary rather than exotic; the title breaks them.
+        let alphabet = Deck(sheetTitle: "Абетка", sheetId: 3, sortOrder: 1)
+        let removed = Deck(sheetTitle: "Старе", sheetId: 4, sortOrder: 0)
+        removed.deletedAt = now
+
+        let rows = SettingsView.deckRows([phrases, removed, alphabet, verbs])
+
+        XCTAssertEqual(rows.map(\.sheetTitle), ["Дієслова", "Абетка", "Фрази"])
+    }
+
+    /// A deleted tab's deck is kept for 30 days so it can be recovered (§4.3). It
+    /// has no queue, so a stepper for it would set a number nothing reads.
+    func testADeletedDecksRowIsNotOffered() {
+        let deck = Deck(sheetTitle: "Дієслова", sheetId: 1)
+        deck.deletedAt = now
+        XCTAssertTrue(SettingsView.deckRows([deck]).isEmpty)
     }
 
     /// A missing key must not read as 0 — the typed `UserDefaults` accessors
@@ -241,5 +295,30 @@ final class SettingsTests: XCTestCase {
         try CredentialStore.delete()
         XCTAssertNotNil(try AnthropicKeyStore.load())
         XCTAssertNotEqual(AnthropicKeyStore.service, CredentialStore.service)
+    }
+
+    // MARK: - Isolation (the pull-to-refresh crash, 2026-09-04)
+
+    /// Settings runs a re-download on the **main** context, from the main actor.
+    /// Every step — discovery, push, pull — takes that context, so every step has
+    /// to stay on the actor that owns it.
+    @MainActor
+    func testARedownloadStaysOnTheActorThatOwnsTheContext() async throws {
+        let stub = SheetStub(rows: ["Verbs": [
+            SheetSyncHarness.header, SheetSyncHarness.row(UUID(), front: "a", back: "b"),
+        ]])
+        let container = try ModelStore.container(inMemory: true)
+        let context = container.mainContext
+        context.insert(Deck(sheetTitle: "Verbs", sheetId: 0))
+        try context.save()
+        let start = Date()
+
+        let outcome = try await SheetRedownload(client: try SheetSyncHarness.makeClient(stub))
+            .run(in: context, now: now)
+
+        XCTAssertEqual(outcome.pull.created, 1, "the re-download did not run")
+        let uses = try OffQueue.uses(since: start)
+        XCTAssertTrue(uses.isEmpty, "the main context was used off the main queue:\n"
+                      + uses.joined(separator: "\n"))
     }
 }

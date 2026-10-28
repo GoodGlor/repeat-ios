@@ -29,9 +29,10 @@ enum NeedsAttention {
         conflicts: Int,
         malformedDecks: Int,
         status: SyncCoordinator.Status,
-        leeches: Int = 0
+        leeches: Int = 0,
+        metaProblems: Int = 0
     ) -> Bool {
-        conflicts == 0 && malformedDecks == 0 && leeches == 0
+        conflicts == 0 && malformedDecks == 0 && leeches == 0 && metaProblems == 0
             && authProblem(status: status) == nil
     }
 
@@ -56,6 +57,10 @@ struct NeedsAttentionCard: View {
     var leeches: [Card] = []
     var onRewrite: ((Note) -> Void)?
     var onDelete: ((Note) -> Void)?
+    /// §5.1: what `_meta` said that was refused. Without this row a 20-weight
+    /// paste was rejected correctly and reported nowhere — the slider showed
+    /// the old value as if the Sheet had never spoken.
+    var metaProblems: [String] = []
 
     private var malformed: [Deck] {
         decks.filter { $0.malformedReason != nil }.sorted { $0.sheetTitle < $1.sheetTitle }
@@ -66,7 +71,7 @@ struct NeedsAttentionCard: View {
     var isEmpty: Bool {
         NeedsAttention.isEmpty(conflicts: conflicts.count,
                                malformedDecks: malformed.count, status: status,
-                               leeches: leeches.count)
+                               leeches: leeches.count, metaProblems: metaProblems.count)
     }
 
     var body: some View {
@@ -99,6 +104,12 @@ struct NeedsAttentionCard: View {
                         label(symbol: "tablecells.badge.ellipsis", tint: Palette.hard,
                               title: deck.sheetTitle,
                               detail: deck.malformedReason ?? "")
+                    }
+
+                    ForEach(metaProblems, id: \.self) { problem in
+                        label(symbol: "slider.horizontal.3", tint: Palette.hard,
+                              title: Localized.string("_meta: значення відхилено"),
+                              detail: problem)
                     }
 
                     if !leeches.isEmpty {

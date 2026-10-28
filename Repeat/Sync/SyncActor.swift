@@ -19,6 +19,8 @@ struct SyncReport: Sendable, Equatable {
     var pull = PullResult()
     var push = PushResult()
     var log = LogPushResult()
+    /// #149. Only a run that pulled touches pictures.
+    var pictures = PictureSyncResult()
     var finishedAt: Date?
 
     var didRun: Bool { if case .completed = verdict { true } else { false } }
@@ -45,7 +47,14 @@ struct SyncReport: Sendable, Equatable {
 /// drain on reconnect" needs no separate queue — only a trigger when the network
 /// returns, which is what `.reconnected` is for.
 actor SyncActor {
-    private let context: ModelContext
+    private let container: ModelContainer
+    /// Made **on the actor**, the first time a run needs it. SwiftData binds a
+    /// context to the queue that creates it; `init` runs wherever the actor is
+    /// constructed — `RepeatApp.init`, the main thread — and a context made there
+    /// was then used on the actor for the rest of the process, which SwiftData
+    /// logs as *"Unbinding from the main queue"* on every launch. The same log
+    /// line on the main context was the 2026-09-04 crash.
+    private lazy var context = ModelContext(container)
     private let makeClient: @Sendable () throws -> SheetsClient
     private let now: @Sendable () -> Date
     /// The same cap Home builds its plan with, so the published count is the one
@@ -55,10 +64,12 @@ actor SyncActor {
     /// `@Observable` settings, and a stale reminder time is corrected on the next
     /// foreground anyway.
     private let reminder: ReminderConfiguration
+    private let pictures: PictureSync
 
     struct ReminderConfiguration: Sendable {
         var enabled = false
         var minutes = AppSettings.defaultReminderMinutes
+        var streakMinutes = AppSettings.defaultStreakReminderMinutes
         var scheduler: any NotificationScheduling = SystemNotificationScheduler()
     }
 
@@ -77,17 +88,19 @@ actor SyncActor {
         makeClient: @escaping @Sendable () throws -> SheetsClient,
         now: @escaping @Sendable () -> Date = { .now },
         queueConfig: QueueConfig = QueueConfig(),
-        reminder: ReminderConfiguration = ReminderConfiguration()
+        reminder: ReminderConfiguration = ReminderConfiguration(),
+        pictures: PictureSync = PictureSync()
     ) {
-        // The actor's own context. SwiftData contexts are not shareable, and the
-        // UI's context must stay on the main thread — this is the one place sync
-        // writes, and it is off the main actor by construction (§4.2: "sync never
-        // blocks the UI").
-        self.context = ModelContext(container)
+        // The actor's own context — see `context`. SwiftData contexts are not
+        // shareable, and the UI's context must stay on the main thread: this is
+        // the one place sync writes, and it is off the main actor by construction
+        // (§4.2: "sync never blocks the UI").
+        self.container = container
         self.makeClient = makeClient
         self.now = now
         self.queueConfig = queueConfig
         self.reminder = reminder
+        self.pictures = pictures
     }
 
     /// Runs a sync for `trigger`, or explains why it didn't.
@@ -187,14 +200,22 @@ actor SyncActor {
             DueCountPublisher.publish(from: context, config: queueConfig, now: now())
             // §7.2: the background refresh is the only thing that can cancel a
             // reminder which has become false since the app was last opened.
-            await DailyReminder.refresh(
+            await EveningReminder.refresh(
                 in: context,
                 enabled: reminder.enabled,
                 reminderMinutes: reminder.minutes,
+                streakMinutes: reminder.streakMinutes,
                 queueConfig: queueConfig,
                 now: now(),
                 using: reminder.scheduler
             )
+            // #149: last, because it is the slow part and nothing above waits
+            // for it. After a pull, so the links are the Sheet's latest; and
+            // a pull is also when a link that failed last time is tried again.
+            if work.contains(.pull), let links = pictureLinks() {
+                try Task.checkCancellation()
+                report.pictures = await pictures.run(links: links)
+            }
         } catch is CancellationError {
             // The background task's expiry handler cancels mid-run. Everything
             // unfinished is still queued in the store, so this is a pause, not a
@@ -214,6 +235,17 @@ actor SyncActor {
 
         report.finishedAt = now()
         return report
+    }
+
+    /// Every live note's picture link, or `nil` when the store could not be
+    /// read — never an empty set in its place, because the picture pass deletes
+    /// every file not in the set it is given.
+    private func pictureLinks() -> Set<String>? {
+        let descriptor = FetchDescriptor<Note>(predicate: #Predicate<Note> { note in
+            note.deletedAt == nil && note.deck.deletedAt == nil
+        })
+        guard let notes = try? context.fetch(descriptor) else { return nil }
+        return Set(notes.compactMap { CardPicture.link(in: $0.extras) })
     }
 
     /// "Offline" and "Google is broken" read the same to the code but need

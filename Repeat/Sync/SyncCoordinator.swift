@@ -55,7 +55,9 @@ final class SyncCoordinator {
         queueConfig: QueueConfig = AppSettings().queueConfig,
         reminder: SyncActor.ReminderConfiguration = {
             let settings = AppSettings()
-            return .init(enabled: settings.reminderEnabled, minutes: settings.reminderMinutes)
+            return .init(enabled: settings.reminderEnabled,
+                         minutes: settings.reminderMinutes,
+                         streakMinutes: settings.streakReminderMinutes)
         }()
     ) {
         self.init(

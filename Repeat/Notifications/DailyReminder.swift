@@ -69,11 +69,9 @@ enum DailyReminder {
         reminderMinutes: Int,
         calendar: Calendar = .current
     ) -> Date {
-        let candidate = calendar.startOfDay(for: now)
-            .addingTimeInterval(Double(reminderMinutes) * 60)
-        if candidate > now { return candidate }
-        return calendar.date(byAdding: .day, value: 1, to: candidate)
-            ?? candidate.addingTimeInterval(86_400)
+        // #128: asked of the calendar rather than added to midnight, so the hour
+        // survives a DST transition.
+        ReminderTime.next(after: now, minutes: reminderMinutes, calendar: calendar)
     }
 
     /// §7.2's body. It used to read "Картки до повторення: N" — the count pushed
@@ -88,8 +86,16 @@ enum DailyReminder {
     // MARK: - Applying
 
     /// Brings the scheduled notification in line with the plan. Idempotent.
+    ///
+    /// `nonisolated(nonsending)`: the body runs on the **caller's** actor. Without
+    /// it a `nonisolated async` function hops to the cooperative pool on entry, so
+    /// `decks` and `logs` — SwiftData models belonging to whoever called — were
+    /// being read on a background thread while the main thread rendered them. On
+    /// the owner's phone, pull-to-refresh made that a crash three times out of
+    /// three (2026-09-04), each with a different signal: SIGSEGV in
+    /// `ReviewLog.stateBefore`, a SwiftData assertion, and an over-release abort.
     @discardableResult
-    static func refresh(
+    nonisolated(nonsending) static func refresh(
         decks: [Deck],
         logs: [ReviewLog],
         enabled: Bool,
@@ -130,8 +136,11 @@ enum DailyReminder {
     }
 
     /// Convenience for the app and the sync actor, which both hold a context.
+    ///
+    /// The context is the caller's — Home passes the **main** one — and a context
+    /// is only ever used on the actor that owns it. Same annotation, same reason.
     @discardableResult
-    static func refresh(
+    nonisolated(nonsending) static func refresh(
         in context: ModelContext,
         enabled: Bool,
         reminderMinutes: Int,

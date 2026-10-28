@@ -106,10 +106,12 @@ final class Note {
     }
 
     /// Extras in display order, skipping empties — an extra with no value renders
-    /// nothing rather than a blank line (D1).
+    /// nothing rather than a blank line (D1). The `image` column is the card's
+    /// picture (#149), shown as a picture, never as a link under the answer.
     var displayExtras: [(key: String, value: String)] {
         extraOrder.compactMap { key in
-            guard let value = extras[key], !value.isEmpty else { return nil }
+            guard key != CardPicture.column,
+                  let value = extras[key], !value.isEmpty else { return nil }
             return (key, value)
         }
     }

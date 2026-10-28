@@ -21,6 +21,9 @@ struct EditNoteView: View {
     @State private var front = ""
     @State private var back = ""
     @State private var example = ""
+    /// #155: the card's picture, above its words. The link lives in the Sheet
+    /// (#149), so this screen shows it and does not edit it.
+    @State private var picture: UIImage?
     @FocusState private var focused: Bool
 
     private var isSavable: Bool {
@@ -31,11 +34,28 @@ struct EditNoteView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if let picture {
+                    Section {
+                        Image(uiImage: picture)
+                            .resizable()
+                            .scaledToFit()
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .frame(maxWidth: .infinity, maxHeight: 240)
+                            .accessibilityLabel("Картинка")
+                            .accessibilityIdentifier("edit.picture")
+                    } footer: {
+                        Text("Картинку змінюють у колонці «image» у Таблиці.")
+                    }
+                }
+
                 Section {
                     TextField("Питання", text: $front, axis: .vertical)
                         .focused($focused)
+                        .accessibilityIdentifier("edit.front")
                     TextField("Відповідь", text: $back, axis: .vertical)
+                        .accessibilityIdentifier("edit.back")
                     TextField("Приклад речення (необовʼязково)", text: $example, axis: .vertical)
+                        .accessibilityIdentifier("edit.example")
                 } header: {
                     Text("Картка")
                 } footer: {
@@ -61,6 +81,7 @@ struct EditNoteView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Зберегти") { save() }
                         .disabled(!isSavable)
+                        .accessibilityIdentifier("edit.save")
                 }
             }
             .task {
@@ -68,6 +89,7 @@ struct EditNoteView: View {
                 back = note.back
                 example = note.example ?? ""
                 focused = true
+                picture = await PictureLoader.image(for: note.extras, maxPixelSize: 1200)
             }
         }
     }

@@ -74,8 +74,11 @@ enum RebuildScheduling {
         )
 
         // Before anything is replaced (#36). A rebuild is destructive by design,
-        // and this is the only thing that makes it reversible.
-        report.backup = try? BackupRunner.run(in: context, directory: backupDirectory, now: now)
+        // and this is the only thing that makes it reversible — so a backup
+        // that cannot be written stops the rebuild here, with nothing touched,
+        // rather than being shrugged off with `try?` on the way to replacing
+        // every card's schedule.
+        report.backup = try BackupRunner.run(in: context, directory: backupDirectory, now: now)
 
         let rows = parse.rows
         let rebuilt = await Task.detached(priority: .userInitiated) {

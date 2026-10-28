@@ -179,6 +179,21 @@ final class AppIntentsTests: XCTestCase {
         XCTAssertEqual(PendingRoute.consume(defaults: suite), .study)
     }
 
+    /// #109: the notification's link is the third destination, parsed the way
+    /// the other two are — host, not path.
+    func testTheStatsLinkRoutesToStats() {
+        XCTAssertEqual(DeepLink.destination(for: URL(string: DeepLink.stats)!), .stats)
+        XCTAssertEqual(DeepLink.destination(for: URL(string: "repeat://STATS")!), .stats)
+        XCTAssertEqual(DeepLink.destination(for: URL(string: "repeat:///stats")!), .stats)
+    }
+
+    func testPendingRouteCarriesStats() {
+        let suite = defaults()
+        PendingRoute.request(.stats, defaults: suite)
+        XCTAssertEqual(PendingRoute.consume(defaults: suite), .stats)
+        XCTAssertNil(PendingRoute.consume(defaults: suite))
+    }
+
     /// Reading it twice would send the person back into a session they already
     /// left — the app looking like it is ignoring them.
     func testPendingRouteIsConsumedOnce() {

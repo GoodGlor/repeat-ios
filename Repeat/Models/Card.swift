@@ -52,4 +52,14 @@ final class Card {
     static func id(noteId: UUID, direction: Direction) -> String {
         "\(noteId.uuidString)#\(direction.rawValue)"
     }
+
+    /// The inverse of `id(noteId:direction:)`, so a caller holding many cards
+    /// can group them by note **without** faulting `card.note` for each — on
+    /// 10k cards that walk is a second of the budget (handoff's SwiftData
+    /// note). `nil` for ids that were never a card's, such as the synthetic
+    /// ones debug seeds write into the log.
+    static func noteId(inCardId id: String) -> UUID? {
+        guard let hash = id.firstIndex(of: "#") else { return nil }
+        return UUID(uuidString: String(id[..<hash]))
+    }
 }

@@ -119,17 +119,23 @@ final class SheetsSettings {
     /// also means a key or spreadsheet id changed in Settings takes effect on the
     /// next sync rather than the next launch.
     static func makeClient(defaults: UserDefaults = .standard) throws -> SheetsClient {
-        guard let account = try CredentialStore.load() else { throw ConfigurationError.noKey }
         let id = (defaults.string(forKey: spreadsheetIdKey) ?? "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !id.isEmpty else { throw ConfigurationError.noSpreadsheetId }
         #if DEBUG
         if let transport = debugTransport {
-            return SheetsClient(spreadsheetId: id,
+            // A stubbed network needs no real credentials. The simulator has none,
+            // so until 2026-09-04 every run with a debug transport stopped here as
+            // *not configured* and the transport was never consulted — the offline
+            // test had never once been offline. The throwaway key only ever signs
+            // a token request that the stub answers.
+            let account = try CredentialStore.load() ?? CannedSheetTransport.throwawayAccount()
+            return SheetsClient(spreadsheetId: id.isEmpty ? "canned" : id,
                                 tokens: GoogleTokenProvider(account: account, transport: transport),
                                 transport: transport)
         }
         #endif
+        guard let account = try CredentialStore.load() else { throw ConfigurationError.noKey }
+        guard !id.isEmpty else { throw ConfigurationError.noSpreadsheetId }
         return SheetsClient(spreadsheetId: id, tokens: GoogleTokenProvider(account: account))
     }
 

@@ -35,7 +35,15 @@ struct SheetRedownload {
         self.client = client
     }
 
-    func run(in context: ModelContext, now: Date = .now) async throws -> Outcome {
+    /// `nonisolated(nonsending)` — here and on every `run` in this directory that
+    /// takes a context. A plain `nonisolated async` function hops to the
+    /// cooperative pool on entry and takes the caller's `ModelContext` with it;
+    /// Settings calls this one with the **main** context, and `SyncActor` calls
+    /// the others with its own. A context belongs to the actor that made it, and
+    /// on the owner's phone the main one being read from a pool thread was a crash
+    /// on every pull-to-refresh (2026-09-04). `SettingsTests` reads SwiftData's own
+    /// "Unbinding from the main queue" diagnostic back out of the log to pin it.
+    nonisolated(nonsending) func run(in context: ModelContext, now: Date = .now) async throws -> Outcome {
         var outcome = Outcome()
 
         // Push first. "Wipes notes" would otherwise mean "loses every card typed

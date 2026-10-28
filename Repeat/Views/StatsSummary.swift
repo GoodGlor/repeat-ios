@@ -35,8 +35,33 @@ struct StatsSummary: Equatable {
     /// Today first, then the next six days.
     var forecast: [ForecastDay]
     var decks: [DeckLine]
+    /// §5.2. Both from the same real-review dates as `streak`.
+    var records: Records
+    var heatmap: Heatmap
+    /// §5.3, newest first. Empty is a real answer: nothing crossed this month.
+    var learnedThisMonth: [Mastery.LearnedWord]
+    /// §5.4: the whole catalogue, in order, each with the day it was first
+    /// shown — or `nil`, locked. The grid **is the ledger**: it evaluates
+    /// nothing, because unlock discovery is the session end (the Done screen
+    /// writes the ledger) and Stats' 300 ms budget has no room for the
+    /// known-word fetch a fresh evaluation needs.
+    var achievements: [Achievement]
+    /// §5.7 (#113). Derived from the log like everything else here — and note
+    /// that this feature ships under a standing recommendation to cut it, so it
+    /// is deliberately one field, one chip and one Done-screen line.
+    var xp: Int = 0
 
-    var hasHistory: Bool { reviewsLast30 > 0 || streak > 0 }
+    struct Achievement: Equatable, Identifiable {
+        var badge: Achievements.Badge
+        var earnedOn: Date?
+        var id: String { badge.rawValue }
+    }
+
+    var earnedCount: Int { achievements.filter { $0.earnedOn != nil }.count }
+
+    /// Anything in the log at all. The year and the records live behind this,
+    /// so a break longer than the retention window must not hide them.
+    var hasHistory: Bool { reviewsLast30 > 0 || streak > 0 || records.bestDay != nil }
     /// The tallest bar, for scaling. At least 1 so a week with nothing due draws
     /// a flat baseline rather than dividing by zero.
     var forecastPeak: Int { max(1, forecast.map(\.due).max() ?? 1) }
@@ -56,17 +81,40 @@ struct StatsSummary: Equatable {
     ///
     /// `fetchCount` sends the whole question to SQLite and gets back an integer.
     /// Roughly twenty small counts replace twenty thousand faults.
-    static func load(from context: ModelContext, now: Date = .now, calendar: Calendar = .current) -> StatsSummary {
+    static func load(
+        from context: ModelContext, now: Date = .now, calendar: Calendar = .current,
+        ledger: AchievementLedger = AchievementLedger()
+    ) -> StatsSummary {
         let decks = (try? context.fetch(FetchDescriptor<Deck>())) ?? []
         let logs = (try? context.fetch(FetchDescriptor<ReviewLog>())) ?? []
+        let dates = reviewDates(logs)
+        // #136: three readers below want the same start-of-day map, and three
+        // more want the same walk of the recent window. Both are built once here.
+        // Measured on the 10k fixture: the day map alone is 13.7 ms and each of
+        // `Streak`/`Records`/`Heatmap` was almost exactly that; the three window
+        // questions were 21.2 ms in three passes against 10.5 ms in one.
+        let days = ReviewDays(reviewDates: dates, calendar: calendar)
+        let frozen = Freeze.days(in: context)
+        let recent = window(logs, now: now, calendar: calendar)
         return StatsSummary(
-            streak: Streak.length(reviewDates: reviewDates(logs), now: now, calendar: calendar),
-            reviewsLast7: countReviews(logs, days: 7, now: now, calendar: calendar),
-            reviewsLast30: countReviews(logs, days: retentionWindowDays, now: now, calendar: calendar),
-            retention: retention(logs, now: now, calendar: calendar),
+            streak: Streak.length(days: days, frozenDays: frozen, now: now, calendar: calendar),
+            reviewsLast7: recent.last7,
+            reviewsLast30: recent.last30,
+            retention: recent.retention,
             forecast: forecast(in: context, now: now, calendar: calendar),
-            decks: deckLines(in: context, decks: decks, now: now)
+            decks: deckLines(in: context, decks: decks, now: now),
+            records: Records.make(days: days, frozenDays: frozen, calendar: calendar),
+            heatmap: Heatmap.make(days: days, now: now, calendar: calendar),
+            learnedThisMonth: Mastery.learnedThisMonth(in: context, logs: logs, now: now, calendar: calendar),
+            achievements: Self.achievements(from: ledger),
+            xp: XP.total(logs: logs)
         )
+    }
+
+    /// §5.4: the catalogue, each paired with the day the ledger first showed it.
+    static func achievements(from ledger: AchievementLedger) -> [Achievement] {
+        let shownOn = ledger.shownOn
+        return Achievements.Badge.allCases.map { Achievement(badge: $0, earnedOn: shownOn[$0.rawValue]) }
     }
 
     /// Why `lastReview != nil` and not `state != .new`.
@@ -176,6 +224,31 @@ struct StatsSummary: Equatable {
     }
 
     /// (Good + Easy) ÷ all, over the last 30 days.
+    /// `reviewsLast7`, `reviewsLast30` and `retention` in one walk (#136).
+    ///
+    /// `countReviews` and `retention` are left exactly as they are below: they read
+    /// clearly one question at a time, the tests drive them directly, and `load` is
+    /// the only caller that needs all three at once. A test pins that this agrees
+    /// with them, which is what makes keeping both honest rather than duplicative.
+    static func window(
+        _ logs: [ReviewLog], now: Date, calendar: Calendar
+    ) -> (last7: Int, last30: Int, retention: Double?) {
+        let cutoff7 = since(7, now: now, calendar: calendar)
+        let cutoff30 = since(retentionWindowDays, now: now, calendar: calendar)
+        var last7 = 0, last30 = 0, remembered = 0
+        for log in logs where log.rating != 0 {
+            if log.reviewedAt >= cutoff7 { last7 += 1 }
+            if log.reviewedAt >= cutoff30 {
+                last30 += 1
+                if log.rating == Grade.good.rawValue || log.rating == Grade.easy.rawValue {
+                    remembered += 1
+                }
+            }
+        }
+        return (last7, last30,
+                last30 == 0 ? nil : Double(remembered) / Double(last30))
+    }
+
     static func retention(_ logs: [ReviewLog], now: Date, calendar: Calendar) -> Double? {
         let cutoff = since(retentionWindowDays, now: now, calendar: calendar)
         let window = logs.filter { $0.rating != 0 && $0.reviewedAt >= cutoff }
@@ -206,6 +279,18 @@ struct StatsSummary: Equatable {
     /// answer without one.
     static func dayCount(_ days: Int, locale: Locale = .current) -> String {
         Localized.string("\(days) день", locale: locale)
+    }
+
+    /// "70 карток", through the same catalogue plural the deck rows use.
+    static func cardCount(_ cards: Int, locale: Locale = .current) -> String {
+        Localized.string("\(cards) карток", locale: locale)
+    }
+
+    /// "1–7 лют. 2027" for the week that starts on `monday`. The interval style
+    /// already knows how to elide the shared month and year, so no key is needed.
+    static func weekSpan(from monday: Date, calendar: Calendar = .current) -> String {
+        let sunday = calendar.date(byAdding: .day, value: 6, to: monday) ?? monday
+        return (monday..<sunday).formatted(date: .abbreviated, time: .omitted)
     }
 
     static func percent(_ value: Double) -> String {

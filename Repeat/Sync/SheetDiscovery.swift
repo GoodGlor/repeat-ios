@@ -17,7 +17,9 @@ struct DiscoveryResult: Equatable {
     /// overriding as overridden, rather than letting it look broken.
     var metaOverrides = SchedulingOverrides()
     /// Problems with `_meta` itself, also surfaced rather than swallowed.
-    var metaProblems: [String] = []
+    /// Persisted with the overrides, so Home can show them after the sync is
+    /// gone (§5.1: "a 'Needs attention' entry rather than applying it").
+    var metaProblems: [String] { metaOverrides.problems }
     /// Whether the `_log` tab exists yet. The phone creates it on the first push
     /// (#17) rather than requiring the owner to have set it up.
     var hasLogSheet = false
@@ -34,7 +36,7 @@ struct SheetDiscovery {
 
     /// - Note: one deck's bad header must not stop the others. §4.6 requires the
     ///   broken deck to be skipped and flagged while the rest sync normally.
-    func run(in context: ModelContext, now: Date = .now) async throws -> DiscoveryResult {
+    nonisolated(nonsending) func run(in context: ModelContext, now: Date = .now) async throws -> DiscoveryResult {
         var result = DiscoveryResult()
 
         let properties = try await client.sheetProperties()
@@ -83,7 +85,7 @@ struct SheetDiscovery {
                 result.schedulerConfig.weights = weights
                 result.metaOverrides.weights = weights
             } catch {
-                result.metaProblems.append("fsrs_params: \(error)")
+                result.metaOverrides.problems.append("fsrs_params: \(error)")
             }
         }
         if let raw = meta.rawDesiredRetention {
@@ -92,7 +94,7 @@ struct SheetDiscovery {
                 result.schedulerConfig.desiredRetention = retention
                 result.metaOverrides.retention = retention
             } catch {
-                result.metaProblems.append("desired_retention: \(error)")
+                result.metaOverrides.problems.append("desired_retention: \(error)")
             }
         }
     }

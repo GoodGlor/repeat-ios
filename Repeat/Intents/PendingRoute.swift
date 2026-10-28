@@ -37,6 +37,7 @@ enum PendingRoute {
         switch destination {
         case .study: return "study"
         case .add: return "add"
+        case .stats: return "stats"
         }
     }
 
@@ -44,6 +45,7 @@ enum PendingRoute {
         switch token {
         case "study": return .study
         case "add": return .add
+        case "stats": return .stats
         default: return nil
         }
     }

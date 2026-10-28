@@ -41,6 +41,16 @@ final class WidgetDueCountTests: XCTestCase {
         }
     }
 
+    /// A defaults suite of its own. `DailyGoalCache` is `UserDefaults.standard`
+    /// by default, and a target another test in this process happened to cache
+    /// would silently change what these publish.
+    private func emptyGoalCache() throws -> DailyGoalCache {
+        let name = "widget-goal-\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: name))
+        addTeardownBlock { defaults.removePersistentDomain(forName: name) }
+        return DailyGoalCache(defaults: defaults)
+    }
+
     // MARK: - Acceptance: the widget count matches Home
 
     /// Home shows the *capped* plan, not a raw count of overdue cards. A widget
@@ -101,6 +111,72 @@ final class WidgetDueCountTests: XCTestCase {
         XCTAssertEqual(plan.count, 0)
     }
 
+    /// §7.1's rule is that there is **one** definition of the day's numbers. Home
+    /// publishes what it is already showing; the sync actor and the background
+    /// refresh publish what Home *would* show. If those two derivations disagree,
+    /// the ring and the streak jump the moment the app is opened — and the day the
+    /// app is never opened is precisely the day the widget matters.
+    func testTheContextPathPublishesTheGoalAndTheStreakToo() throws {
+        let (context, deck) = try makeStore()
+        addCards(context, to: deck, count: 9, due: now.addingTimeInterval(-60))
+        // A run ending today: today, yesterday, and the two days before.
+        for daysAgo in 0...3 {
+            let date = try XCTUnwrap(
+                Calendar.current.date(byAdding: .day, value: -daysAgo, to: now))
+            context.insert(try ReviewLog(
+                cardId: "seen-\(daysAgo)", direction: .forward, rating: 3,
+                reviewedAt: date, elapsedDays: 1, scheduledDays: 1,
+                stateBefore: .review, prevState: CardSchedulingSnapshot()))
+        }
+        try context.save()
+
+        DueCountPublisher.publish(from: context, now: now, reloadWidgets: false,
+                                  to: file, goalCache: try emptyGoalCache())
+
+        let published = try XCTUnwrap(DueCount.read(from: file))
+        XCTAssertEqual(published.streak, 4, "four consecutive days, ending today")
+        XCTAssertEqual(published.goalDone, 1, "one distinct card graded today")
+        XCTAssertEqual(published.goalTarget, published.goalDone + published.due,
+                       "no cached target for this day, so the target is what today looks like")
+        XCTAssertEqual(published.due, 9)
+    }
+
+
+    /// §5.1: the target is what today looked like the **first** time it was built,
+    /// not what it looks like now. Re-deriving it on every publish would grow the
+    /// ring's denominator each time a card came due, and the ring would crawl
+    /// backwards while the owner was working.
+    func testAPublishHonoursTheTargetHomeAlreadyCached() throws {
+        let (context, deck) = try makeStore()
+        addCards(context, to: deck, count: 9, due: now.addingTimeInterval(-60))
+        try context.save()
+        let cache = try emptyGoalCache()
+        cache.store(40, on: now)
+
+        DueCountPublisher.publish(from: context, now: now, reloadWidgets: false,
+                                  to: file, goalCache: cache)
+
+        let published = try XCTUnwrap(DueCount.read(from: file))
+        XCTAssertEqual(published.goalTarget, 40, "the cached 40 wins over a fresh 0 + 9")
+        XCTAssertEqual(published.due, 9)
+    }
+
+    /// The publisher **reads** the cache and never writes it. §5.1 makes the
+    /// target what today looked like the first time *Home* built it; a background
+    /// publish that stored its own would change the number Home then shows, which
+    /// is a behaviour change #111 was not asked to make.
+    func testPublishingNeverWritesTheGoalCache() throws {
+        let (context, deck) = try makeStore()
+        addCards(context, to: deck, count: 9, due: now.addingTimeInterval(-60))
+        try context.save()
+        let cache = try emptyGoalCache()
+
+        DueCountPublisher.publish(from: context, now: now, reloadWidgets: false,
+                                  to: file, goalCache: cache)
+
+        XCTAssertNil(cache.target(on: now), "the publisher must not set today's target")
+    }
+
     // MARK: - Staleness
 
     /// A count computed for another day is not a small error — it is the wrong
@@ -112,6 +188,47 @@ final class WidgetDueCountTests: XCTestCase {
         XCTAssertFalse(stale.isFresh(on: now))
         XCTAssertTrue(DueCount(due: 42, day: Calendar.current.startOfDay(for: now),
                                generatedAt: now).isFresh(on: now))
+    }
+
+    // MARK: - #111: the goal and the streak travel in the same file
+
+    /// gotcha 69, the shape that nearly shipped in #112: a **synthesized** `Codable`
+    /// initialiser ignores a property's default and throws `keyNotFound` for the
+    /// missing key. `DueCount.read` swallows that with `try?`, so a file written
+    /// before this card — which exists on every install that has ever run the
+    /// widget — would read as `nil` and the widget would say "—" until the app
+    /// next published.
+    func testAFileWrittenBeforeTheGoalExistedStillReads() throws {
+        let formatter = ISO8601DateFormatter()
+        let day = Calendar.current.startOfDay(for: now)
+        let legacy = """
+        {"due":7,"day":"\(formatter.string(from: day))",\
+        "generatedAt":"\(formatter.string(from: now))"}
+        """
+        try Data(legacy.utf8).write(to: file)
+
+        let read = try XCTUnwrap(DueCount.read(from: file),
+                                 "a pre-#111 file must still decode")
+        XCTAssertEqual(read.due, 7)
+        XCTAssertEqual(read.goalTarget, 0)
+        XCTAssertEqual(read.goalDone, 0)
+        XCTAssertEqual(read.streak, 0)
+    }
+
+    func testTheGoalAndStreakSurviveTheRoundTrip() throws {
+        let count = DueCount(due: 12, day: Calendar.current.startOfDay(for: now),
+                             goalTarget: 30, goalDone: 18, streak: 9, generatedAt: now)
+        try count.write(to: file)
+        XCTAssertEqual(DueCount.read(from: file), count)
+    }
+
+    /// The ring's fraction, with the two edges that would draw a lie: no goal at
+    /// all, and a catch-up day that graded more than the morning promised.
+    func testTheRingIsEmptyWithoutAGoalAndNeverOverdraws() {
+        let day = Calendar.current.startOfDay(for: now)
+        XCTAssertEqual(DueCount(due: 0, day: day, goalTarget: 0, goalDone: 0).goalProgress, 0)
+        XCTAssertEqual(DueCount(due: 0, day: day, goalTarget: 20, goalDone: 5).goalProgress, 0.25)
+        XCTAssertEqual(DueCount(due: 0, day: day, goalTarget: 20, goalDone: 25).goalProgress, 1)
     }
 
     func testTheFileSurvivesARoundTripAcrossProcesses() throws {

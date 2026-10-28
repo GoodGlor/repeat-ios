@@ -20,13 +20,31 @@ enum SchemaV1: VersionedSchema {
     }
 }
 
+/// #112 adds `StreakFreeze`, and with it the first migration this plan has ever
+/// had to perform.
+///
+/// A whole new entity is additive: no column on disk changes meaning or type, so
+/// nothing has to be rewritten and `.lightweight` is both correct and the safest
+/// thing available. The rule that would have forced a custom stage is the one
+/// `Note.lastSyncedHash` taught by breaking — a *mandatory attribute added to an
+/// existing model*. `StreakFreeze`'s attributes are mandatory, and may be: there
+/// are no rows of it on disk to fill in.
+enum SchemaV2: VersionedSchema {
+    static var versionIdentifier: Schema.Version { Schema.Version(2, 0, 0) }
+    static var models: [any PersistentModel.Type] {
+        SchemaV1.models + [StreakFreeze.self]
+    }
+}
+
 enum RepeatMigrationPlan: SchemaMigrationPlan {
-    static var schemas: [any VersionedSchema.Type] { [SchemaV1.self] }
-    static var stages: [MigrationStage] { [] }
+    static var schemas: [any VersionedSchema.Type] { [SchemaV1.self, SchemaV2.self] }
+    static var stages: [MigrationStage] {
+        [.lightweight(fromVersion: SchemaV1.self, toVersion: SchemaV2.self)]
+    }
 }
 
 enum ModelStore {
-    static let schema = Schema(versionedSchema: SchemaV1.self)
+    static let schema = Schema(versionedSchema: SchemaV2.self)
     static let storeFileName = "Repeat.store"
 
     /// Where the store lives.

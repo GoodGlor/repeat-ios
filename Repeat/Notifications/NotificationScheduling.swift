@@ -6,12 +6,18 @@ import UserNotifications
 /// Behind a protocol because the interesting behaviour — never scheduling a
 /// notification that would be false, and replacing rather than stacking — cannot
 /// be asserted against the real notification centre in a unit test.
+///
+/// The requirements are `nonisolated(nonsending)`: a call stays on the caller's
+/// actor rather than hopping to the cooperative pool. Nothing here needs a
+/// background thread — the centre's own calls are already async — and it lets a
+/// test's scheduler observe which executor `DailyReminder.refresh` runs on, which
+/// is how the 2026-09-04 crash is pinned.
 protocol NotificationScheduling: Sendable {
-    func pendingRequests() async -> [UNNotificationRequest]
-    func removePending(identifiers: [String]) async
-    func add(_ request: UNNotificationRequest) async throws
+    nonisolated(nonsending) func pendingRequests() async -> [UNNotificationRequest]
+    nonisolated(nonsending) func removePending(identifiers: [String]) async
+    nonisolated(nonsending) func add(_ request: UNNotificationRequest) async throws
     /// Whether notifications may be shown at all.
-    func requestAuthorization() async -> Bool
+    nonisolated(nonsending) func requestAuthorization() async -> Bool
 }
 
 struct SystemNotificationScheduler: NotificationScheduling {

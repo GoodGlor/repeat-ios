@@ -132,4 +132,22 @@ final class SyncCoordinatorTests: XCTestCase {
         try await Task.sleep(nanoseconds: 200_000_000)
         XCTAssertEqual(stub.propertyRequests, 1)
     }
+
+    /// The actor's context is made where the actor is made — `RepeatApp.init`, on
+    /// the main thread — and used on the actor ever after. SwiftData binds a
+    /// context to the queue that created it and logs the moment it is used
+    /// elsewhere; on the **main** context that log line was the 2026-09-04 crash.
+    /// The actor's context has to be created on the actor.
+    func testTheActorsContextIsMadeOnTheActorNotOnMain() async throws {
+        let stub = makeStub()
+        let coordinator = try makeCoordinator(stub, container: ModelStore.container(inMemory: true))
+        let start = Date()
+
+        await coordinator.performAndWait(.pullToRefresh)
+
+        XCTAssertEqual(stub.propertyRequests, 1, "the sync did not run")
+        let uses = try OffQueue.uses(since: start)
+        XCTAssertTrue(uses.isEmpty, "a context was used off the queue that made it:\n"
+                      + uses.joined(separator: "\n"))
+    }
 }

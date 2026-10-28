@@ -33,6 +33,10 @@ struct RootTabView: View {
         case .add:
             showingOnboarding = false
             tab = .add
+        case .stats:
+            // #109: a notification's link. Onboarding would otherwise cover it.
+            showingOnboarding = false
+            tab = .stats
         }
     }
 
@@ -78,6 +82,13 @@ struct RootTabView: View {
         }
         .tint(Palette.accent)
         .onOpenURL { open($0) }
+        // #109: a notification tapped while this view is already up. Cold
+        // launches are covered by `.task`, foregrounds by the scene-phase change;
+        // this is the third case, and the only one neither of those sees.
+        .onReceive(NotificationCenter.default.publisher(for: NotificationRouter.routeRequested)
+                    .receive(on: RunLoop.main)) { _ in
+            consumePendingRoute()
+        }
         // Full screen: §6.1 is the first thing a fresh install sees, and it ends
         // with the connection that makes the app non-empty.
         .fullScreenCover(isPresented: $showingOnboarding) {

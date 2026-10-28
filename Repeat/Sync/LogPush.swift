@@ -43,7 +43,7 @@ struct LogPush {
         self.client = client
     }
 
-    func run(
+    nonisolated(nonsending) func run(
         discovery: DiscoveryResult,
         in context: ModelContext
     ) async throws -> LogPushResult {

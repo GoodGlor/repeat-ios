@@ -279,6 +279,46 @@ final class HomeSummaryTests: XCTestCase {
         XCTAssertTrue(StreakChip.isWorthShowing(30))
     }
 
+    // MARK: - M9 §5.1: the goal is fixed for the day
+
+    /// Ten cards graded, then five more arrive. #89's ratio would read 10/15;
+    /// the goal stays closed and the five are extra.
+    func testAClosedGoalStaysClosedWhenCardsArrive() throws {
+        let context = try makeStore()
+        makeDeck(context, title: "Verbs", cards: 5, due: now.addingTimeInterval(-60))
+        try context.save()
+        // Ten *other* cards graded today — ids the plan does not contain.
+        let logs = try (0..<10).map { index in
+            try ReviewLog(cardId: "graded-\(index)", direction: .forward, rating: 3, reviewedAt: now,
+                          elapsedDays: 0, scheduledDays: 1, stateBefore: .review,
+                          prevState: CardSchedulingSnapshot())
+        }
+
+        let summary = HomeSummary.make(
+            decks: try context.fetch(FetchDescriptor<Deck>()),
+            plan: try plan(context), logsToday: logs, cachedTarget: 10, now: now, calendar: calendar)
+
+        XCTAssertEqual(summary.dueCount, 5, "the five that arrived are still due")
+        XCTAssertEqual(summary.goal.target, 10)
+        XCTAssertTrue(summary.goal.isClosed)
+        XCTAssertEqual(summary.todayProgress, 1, accuracy: 0.0001)
+        XCTAssertFalse(summary.isAllDone, "closed is not the same as empty")
+    }
+
+    /// Without a cache the goal is #89's ratio exactly — nothing changes for the
+    /// first build of a day.
+    func testWithoutACacheTheGoalIsTodayAsItStands() throws {
+        let context = try makeStore()
+        makeDeck(context, title: "Verbs", cards: 4, due: now.addingTimeInterval(-60))
+        try context.save()
+
+        let summary = HomeSummary.make(
+            decks: try context.fetch(FetchDescriptor<Deck>()),
+            plan: try plan(context), logsToday: [], now: now, calendar: calendar)
+
+        XCTAssertEqual(summary.goal, DailyGoal(target: 4, done: 0))
+    }
+
     // MARK: - Greeting
 
     func testGreetingFollowsTheClock() {
@@ -298,5 +338,33 @@ final class HomeSummaryTests: XCTestCase {
         XCTAssertNil(SyncTrigger.pullToRefresh.throttleInterval,
                      "§4.2 exempts pull-to-refresh; the behaviour itself is proven in SyncActorTests")
         XCTAssertEqual(SyncTrigger.appActive.throttleInterval, 600)
+    }
+
+    // MARK: - #106: each row's three segments
+
+    func testDeckRowsCarryTheirMasteryCounts() throws {
+        let context = try makeStore()
+        let deck = makeDeck(context, title: "Verbs", cards: 6)
+        let cards = deck.notes.flatMap(\.cards).sorted { $0.note.front < $1.note.front }
+        // Two known, one learning, three new. Written the way `rate()` would
+        // leave them: a reviewed card has `lastReview` and `reps`.
+        for (index, card) in cards.enumerated() {
+            switch index {
+            case 0, 1:
+                card.state = .review; card.stability = 25
+                card.lastReview = now.addingTimeInterval(-86_400); card.reps = 5
+            case 2:
+                card.state = .review; card.stability = 3
+                card.lastReview = now.addingTimeInterval(-86_400); card.reps = 2
+            default:
+                break
+            }
+        }
+        try context.save()
+
+        let summary = HomeSummary.make(decks: [deck], plan: try plan(context), logsToday: [], now: now)
+        XCTAssertEqual(summary.decks.first?.mastery, Mastery.Counts(known: 2, learning: 1, new: 3))
+        XCTAssertEqual(summary.decks.first?.mastery.total, summary.decks.first?.cardCount,
+                       "the bar covers the same cards as the count beside it")
     }
 }

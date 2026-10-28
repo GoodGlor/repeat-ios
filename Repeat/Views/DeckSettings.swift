@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SwiftUI
 
 /// The per-deck operations behind the settings screen (§6.2).
 ///
@@ -15,6 +16,31 @@ enum DeckSettings {
     ]
 
     static let newCardsPerDayRange = 0...50
+
+    /// A binding that writes through to the **store**, not just to the model.
+    ///
+    /// `@Bindable var deck` gives a binding that mutates the object and stops
+    /// there. SwiftData's autosave is not a guarantee — measured: set a deck's
+    /// allowance to 17, kill the app from the switcher, relaunch, and it reads 15
+    /// again. Every other mutation in this file already saves explicitly
+    /// (`setSuspended`, `move`); the steppers and toggles were the ones that did
+    /// not, on both the swipe-in deck screen and the Settings list.
+    ///
+    /// Saving per edit rather than on dismiss is deliberate: a force-quit never
+    /// reaches a dismissal, and one scalar is not a write worth batching.
+    static func binding<Value>(
+        _ deck: Deck,
+        _ keyPath: ReferenceWritableKeyPath<Deck, Value>,
+        in context: ModelContext
+    ) -> Binding<Value> {
+        Binding(
+            get: { deck[keyPath: keyPath] },
+            set: { newValue in
+                deck[keyPath: keyPath] = newValue
+                try? context.save()
+            }
+        )
+    }
 
     /// Suspends or resumes every card in the deck.
     ///

@@ -53,6 +53,62 @@ final class ModelTests: XCTestCase {
         XCTAssertEqual(Set(reloaded.cards.map(\.direction)), [.forward, .reverse])
     }
 
+    // MARK: - #112: the first migration this app has ever performed
+
+    /// The claim that matters is **not** "a V2 store opens" — a fresh store
+    /// always opens. It is that a store written by the shipped V1 schema, with
+    /// real rows in it, opens under V2 and still has them.
+    ///
+    /// The phone holds the only copy of scheduling state (§8). A migration that
+    /// failed here would not lose a feature; it would lose the app's data.
+    func testAVersionOneStoreMigratesToVersionTwoWithoutLosingAnything() throws {
+        let url = URL.temporaryDirectory.appending(path: "migrate-\(UUID().uuidString).store")
+        addTeardownBlock { try? FileManager.default.removeItem(at: url) }
+
+        let noteId = UUID()
+        // Written by V1: it does not know `StreakFreeze` exists.
+        do {
+            let v1 = Schema(versionedSchema: SchemaV1.self)
+            let container = try ModelContainer(
+                for: v1, configurations: ModelConfiguration(schema: v1, url: url)
+            )
+            let ctx = ModelContext(container)
+            let deck = makeDeck(ctx)
+            let note = Note(id: noteId, deck: deck, front: "reluctant", back: "неохочий")
+            ctx.insert(note)
+            ctx.syncCards(for: note)
+            let card = try XCTUnwrap(note.cards.first)
+            card.state = .review
+            card.stability = 12.5
+            card.reps = 4
+            try ctx.save()
+        }
+
+        // Opened by the app as it ships now — V2, through the migration plan.
+        let container = try ModelContainer(
+            for: ModelStore.schema,
+            migrationPlan: RepeatMigrationPlan.self,
+            configurations: ModelConfiguration(schema: ModelStore.schema, url: url)
+        )
+        let ctx = ModelContext(container)
+
+        let notes = try ctx.fetch(FetchDescriptor<Note>())
+        XCTAssertEqual(notes.count, 1, "the migration dropped the store's notes")
+        XCTAssertEqual(notes.first?.id, noteId)
+        let card = try XCTUnwrap(notes.first?.cards.first)
+        XCTAssertEqual(card.state, .review, "scheduling did not survive the migration")
+        XCTAssertEqual(card.stability, 12.5)
+        XCTAssertEqual(card.reps, 4)
+
+        // And the entity the migration was for is usable afterwards.
+        XCTAssertTrue(try ctx.fetch(FetchDescriptor<StreakFreeze>()).isEmpty,
+                      "a store that never had freezes must arrive with none")
+        let day = Calendar.current.startOfDay(for: .now)
+        ctx.insert(StreakFreeze(day: day, spentAt: .now))
+        try ctx.save()
+        XCTAssertEqual(try ctx.fetch(FetchDescriptor<StreakFreeze>()).count, 1)
+    }
+
     // MARK: - Cascade deletes
 
     func testDeletingNoteCascadesToItsCards() throws {
@@ -260,6 +316,16 @@ final class ModelTests: XCTestCase {
         try ctx.save()
         // Still a live row — soft delete must not remove it from the store.
         XCTAssertEqual(try ctx.fetch(FetchDescriptor<Note>()).count, 1)
+    }
+
+    // MARK: - #106: the note behind a card id, without faulting the note
+
+    func testTheNoteIdCanBeReadBackOffACardId() {
+        let noteId = UUID()
+        XCTAssertEqual(Card.noteId(inCardId: Card.id(noteId: noteId, direction: .forward)), noteId)
+        XCTAssertEqual(Card.noteId(inCardId: Card.id(noteId: noteId, direction: .reverse)), noteId)
+        XCTAssertNil(Card.noteId(inCardId: "history-3-1"), "a synthetic log id names no note")
+        XCTAssertNil(Card.noteId(inCardId: ""))
     }
 }
 

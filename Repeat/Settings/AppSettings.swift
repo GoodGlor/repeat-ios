@@ -24,6 +24,10 @@ final class AppSettings {
     /// Minutes from midnight, local. Stored as a number rather than a `Date` so a
     /// reminder set at 21:00 stays at 21:00 across a timezone change.
     var reminderMinutes: Int { didSet { write(.reminderMinutes, reminderMinutes) } }
+    /// §5.5's separate time for the streak-at-risk reminder. Minutes from
+    /// midnight, for the reason above: a time set at 20:00 stays at 20:00 across a
+    /// timezone change.
+    var streakReminderMinutes: Int { didSet { write(.streakReminderMinutes, streakReminderMinutes) } }
     var autofillEnabled: Bool { didSet { write(.autofillEnabled, autofillEnabled) } }
     var autofillModel: String { didSet { write(.autofillModel, autofillModel) } }
 
@@ -37,6 +41,10 @@ final class AppSettings {
     static let defaultLeechThreshold = 8
     /// 21:00.
     static let defaultReminderMinutes = 21 * 60
+    /// 20:00 — deliberately before the due-reminder's 21:00. On an evening both
+    /// would fire, §5.5 keeps only this one, and the owner sees it at the earlier
+    /// hour rather than losing an hour to a notification that never arrives.
+    static let defaultStreakReminderMinutes = 20 * 60
     static let defaultAutofillModel = "claude-sonnet-5"
     static let newCardCapRange = 0...200
     static let leechThresholdRange = 3...20
@@ -47,6 +55,7 @@ final class AppSettings {
         case leechThreshold = "settings.leechThreshold"
         case reminderEnabled = "settings.reminderEnabled"
         case reminderMinutes = "settings.reminderMinutes"
+        case streakReminderMinutes = "settings.streakReminderMinutes"
         case autofillEnabled = "settings.autofillEnabled"
         case autofillModel = "settings.autofillModel"
     }
@@ -65,6 +74,8 @@ final class AppSettings {
         reminderEnabled = defaults.object(forKey: Key.reminderEnabled.rawValue) as? Bool ?? false
         reminderMinutes = defaults.object(forKey: Key.reminderMinutes.rawValue) as? Int
             ?? Self.defaultReminderMinutes
+        streakReminderMinutes = defaults.object(forKey: Key.streakReminderMinutes.rawValue) as? Int
+            ?? Self.defaultStreakReminderMinutes
         autofillEnabled = defaults.object(forKey: Key.autofillEnabled.rawValue) as? Bool ?? false
         autofillModel = defaults.string(forKey: Key.autofillModel.rawValue)
             ?? Self.defaultAutofillModel

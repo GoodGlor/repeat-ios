@@ -12,7 +12,29 @@ final class SchedulerTests: XCTestCase {
     /// `3d` and then schedules something else is a silent trust failure.
     func testPreviewMatchesWhatApplyingActuallySchedules() throws {
         let scheduler = Scheduler()
-        for state in SchedulingState.allCases {
+        for (name, card, at) in try parityCases(scheduler) {
+            let preview = try scheduler.preview(for: card, now: at)
+            for grade in Grade.allCases {
+                let predicted = try XCTUnwrap(preview[grade], "\(name) \(grade)")
+                let applied = try scheduler.apply(grade, to: card, now: at)
+                XCTAssertEqual(
+                    predicted.due, applied.snapshot.due,
+                    "\(name)/\(grade): button promised \(predicted.label)"
+                )
+                XCTAssertEqual(predicted.resultingState, applied.snapshot.state, "\(name)/\(grade)")
+            }
+        }
+    }
+
+    /// Every state, plus the two shapes #122 actually broke.
+    ///
+    /// The four-state sweep alone does not reach them: its synthetic `.learning`
+    /// card carries `learningStepIndex 0`, so `Good` gives it `10m` and it never
+    /// graduates — which is exactly why the collapse survived this test for so
+    /// long. The last two cases are cards that really are one `Good` away from
+    /// leaving their steps.
+    private func parityCases(_ scheduler: Scheduler) throws -> [(String, CardSchedulingSnapshot, Date)] {
+        var cases: [(String, CardSchedulingSnapshot, Date)] = SchedulingState.allCases.map { state in
             var card = CardSchedulingSnapshot(state: state, due: now)
             if state != .new {
                 card.stability = 8
@@ -21,17 +43,16 @@ final class SchedulerTests: XCTestCase {
                 card.scheduledDays = 8
                 card.lastReview = now.addingTimeInterval(-8 * 86_400)
             }
-            let preview = try scheduler.preview(for: card, now: now)
-            for grade in Grade.allCases {
-                let predicted = try XCTUnwrap(preview[grade], "\(state) \(grade)")
-                let applied = try scheduler.apply(grade, to: card, now: now)
-                XCTAssertEqual(
-                    predicted.due, applied.snapshot.due,
-                    "\(state)/\(grade): button promised \(predicted.label)"
-                )
-                XCTAssertEqual(predicted.resultingState, applied.snapshot.state, "\(state)/\(grade)")
-            }
+            return ("\(state)", card, now)
         }
+
+        let graduating = try walk([.again, .good], from: CardSchedulingSnapshot(due: now), with: scheduler)
+        cases.append(("learning, one Good from graduating", graduating.card, graduating.at))
+
+        let lapsed = try scheduler.apply(.again, to: reviewCard(stability: 2), now: now).snapshot
+        cases.append(("relearning after a lapse", lapsed, lapsed.due))
+
+        return cases
     }
 
     func testAllFourGradesArePreviewed() throws {
@@ -71,6 +92,109 @@ final class SchedulerTests: XCTestCase {
         XCTAssertEqual(graduated.state, .review)
         XCTAssertGreaterThan(graduated.due.timeIntervalSince(at), 86_400,
                              "leaving learning means an interval measured in days")
+    }
+
+    // MARK: - #122: Easy has to buy something Good does not
+
+    /// Graduating out of learning is the one transition FSRS computes a grade at
+    /// a time: `newState` and `learningState` call `applyLearningSteps` per grade,
+    /// and only `reviewState` runs `nextIntervalReview` to order them against each
+    /// other. On a card whose stability is still low — any card rated `Again` at
+    /// least once — Good and Easy both fall under `nextInterval`'s `max(1, …)`
+    /// floor, land on the same day, and `Easy` promises nothing.
+    ///
+    /// A card walked straight `new → Good → Good` does *not* show it: its
+    /// stability is high enough to give Good `2d` and Easy `4d`. That is why the
+    /// setup here rates `Again` first.
+    func testEasyBeatsGoodWhenALearningCardGraduates() throws {
+        let scheduler = Scheduler()
+        let onLastStep = try walk([.again, .good], from: CardSchedulingSnapshot(due: now), with: scheduler)
+        let at = onLastStep.card.due
+
+        let good = try scheduler.apply(.good, to: onLastStep.card, now: at).snapshot
+        let easy = try scheduler.apply(.easy, to: onLastStep.card, now: at).snapshot
+
+        XCTAssertEqual(onLastStep.card.state, .learning, "the setup has to still be in learning")
+        XCTAssertEqual(good.state, .review, "…and Good has to be the step that graduates it")
+        XCTAssertEqual(easy.state, .review)
+        XCTAssertGreaterThanOrEqual(easy.due.timeIntervalSince(good.due), 86_400,
+                                    "Easy must buy at least a day over Good")
+        XCTAssertGreaterThan(easy.scheduledDays, good.scheduledDays,
+                             "the `_log` figure moves with the due date, or replay undoes it")
+    }
+
+    /// The same collapse on the far more common path: a review card that lapsed.
+    /// This is the shape in the owner's screenshot — `Again 10m` and `Hard 15m`
+    /// are the single relearning step and that step × 1.5.
+    func testEasyBeatsGoodWhenARelearningCardGraduates() throws {
+        let scheduler = Scheduler()
+        let lapsed = try scheduler.apply(.again, to: reviewCard(stability: 2), now: now).snapshot
+        let at = lapsed.due
+
+        let good = try scheduler.apply(.good, to: lapsed, now: at).snapshot
+        let easy = try scheduler.apply(.easy, to: lapsed, now: at).snapshot
+
+        XCTAssertEqual(lapsed.state, .relearning)
+        XCTAssertEqual(good.state, .review)
+        XCTAssertGreaterThanOrEqual(easy.due.timeIntervalSince(good.due), 86_400)
+        XCTAssertGreaterThan(easy.scheduledDays, good.scheduledDays)
+    }
+
+    /// The owner-visible symptom, in the owner's terms: the row read
+    /// `Again 10m · Hard 15m · Good 1d · Easy 1d` — four buttons, three promises.
+    func testTheGraduatingRatingRowShowsFourDifferentLabels() throws {
+        let scheduler = Scheduler()
+        let lapsed = try scheduler.apply(.again, to: reviewCard(stability: 2), now: now).snapshot
+
+        let previews = try scheduler.preview(for: lapsed, now: lapsed.due)
+        let labels = try Grade.allCases.map { try XCTUnwrap(previews[$0]).label }
+
+        XCTAssertEqual(Set(labels).count, 4, "the row read \(labels.joined(separator: " · "))")
+    }
+
+    /// Nothing may be adjusted on a card already in review: `nextIntervalReview`
+    /// has ordered the grades there since before #122, and the fix must be a
+    /// no-op rather than a second, competing rule.
+    func testAReviewCardsIntervalsAreLeftExactlyAsFsrsSetThem() throws {
+        let scheduler = Scheduler()
+        for stability in [1.0, 2.0, 3.0, 6.0, 15.0, 60.0] {
+            let card = reviewCard(stability: stability)
+            let preview = try scheduler.preview(for: card, now: now)
+            for grade in Grade.allCases {
+                let promised = try XCTUnwrap(preview[grade])
+                let applied = try scheduler.apply(grade, to: card, now: now)
+                XCTAssertEqual(promised.due, applied.snapshot.due, "s=\(stability) \(grade)")
+            }
+            let dues = try Grade.allCases.map { try XCTUnwrap(preview[$0]).due }
+            XCTAssertEqual(dues, dues.sorted(), "s=\(stability): Again ≤ Hard ≤ Good ≤ Easy")
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func reviewCard(stability: Double) -> CardSchedulingSnapshot {
+        CardSchedulingSnapshot(
+            state: .review, due: now, stability: stability, difficulty: 6,
+            scheduledDays: Int(stability), reps: 5,
+            lastReview: now.addingTimeInterval(-stability * 86_400)
+        )
+    }
+
+    /// Rates a card through a sequence, each rating at the previous one's due
+    /// date — the only way to reach a low-stability card sitting on its last
+    /// learning step.
+    private func walk(
+        _ grades: [Grade],
+        from start: CardSchedulingSnapshot,
+        with scheduler: Scheduler
+    ) throws -> (card: CardSchedulingSnapshot, at: Date) {
+        var card = start
+        var at = now
+        for grade in grades {
+            card = try scheduler.apply(grade, to: card, now: at).snapshot
+            at = card.due
+        }
+        return (card, at)
     }
 
     func testAgainOnAReviewCardRelearnsAndCountsALapse() throws {
@@ -224,7 +348,7 @@ final class SchedulerTests: XCTestCase {
     /// it returns zero for every one of them, which reached the screen as
     /// "Добре 0м". Nothing before this exercised intervals past a month.
     func testLongIntervalsAreNotZero() {
-        for (days, expected) in [(45.0, "2"), (100.0, "3"), (400.0, "1"), (800.0, "2")] {
+        for (days, expected) in [(45.0, "1.5"), (100.0, "3.3"), (400.0, "13.3"), (800.0, "2.2")] {
             let label = IntervalFormatter.short(days * 86_400, locale: Self.en)
             XCTAssertTrue(label.contains(expected),
                           "\(days) days rendered as \"\(label)\"")

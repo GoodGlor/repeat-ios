@@ -17,22 +17,28 @@ enum LogReplay {
 
     struct Row: Equatable, Sendable {
         let cardId: String
-        let grade: Grade
+        /// `nil` is an undo marker (§5.5): `rating == 0`, written when a review
+        /// that had already reached the Sheet was taken back. It stays in `rows`
+        /// because it has to be replayed *in order* — it cancels the review
+        /// standing before it, and only the `(reviewedAt, position)` order says
+        /// which one that is.
+        let grade: Grade?
         let reviewedAt: Date
+
+        var isUndoMarker: Bool { grade == nil }
     }
 
     struct Parse: Equatable, Sendable {
         var rows: [Row] = []
-        /// `rating == 0` — undo markers (§5.5), not reviews. `Streak` and
-        /// `StatsSummary` filter the same way; this is the third reader of that
-        /// rule and the last place it should ever be restated.
+        /// `rating == 0` — undo markers (§5.5), not reviews. Counted for the
+        /// confirmation dialog; what they *do* is in `replay`.
         var undoMarkers = 0
         /// Rows that could not be read at all. Reported rather than dropped
         /// silently: a `_log` the owner has hand-edited is exactly when someone
         /// needs to know.
         var malformed = 0
 
-        var reviewCount: Int { rows.count }
+        var reviewCount: Int { rows.count - undoMarkers }
     }
 
     // MARK: - Parsing
@@ -63,18 +69,8 @@ enum LogReplay {
                     .trimmingCharacters(in: .whitespacesAndNewlines),
                   !cardId.isEmpty,
                   let ratingText = row[safe: layout.rating],
-                  let rating = Int(ratingText.trimmingCharacters(in: .whitespaces))
-            else {
-                parse.malformed += 1
-                continue
-            }
-
-            if rating == 0 {
-                parse.undoMarkers += 1
-                continue
-            }
-
-            guard let grade = Grade(rawValue: rating),
+                  let rating = Int(ratingText.trimmingCharacters(in: .whitespaces)),
+                  rating == 0 || Grade(rawValue: rating) != nil,
                   let reviewedText = row[safe: layout.reviewedAt],
                   let reviewedAt = timestamp.date(from: reviewedText.trimmingCharacters(in: .whitespaces))
             else {
@@ -82,7 +78,8 @@ enum LogReplay {
                 continue
             }
 
-            parse.rows.append(Row(cardId: cardId, grade: grade, reviewedAt: reviewedAt))
+            if rating == 0 { parse.undoMarkers += 1 }
+            parse.rows.append(Row(cardId: cardId, grade: Grade(rawValue: rating), reviewedAt: reviewedAt))
         }
         return parse
     }
@@ -114,6 +111,13 @@ enum LogReplay {
     /// not a total order — two reviews of the same card can share a second — and
     /// an unstable order would make the result differ between runs, which is the
     /// one thing this feature cannot afford.
+    ///
+    /// An undo marker does what the undo it records did: it puts the card back
+    /// to the state before its latest standing review. The original row stays
+    /// in `_log` (it had already been uploaded — that is why the marker exists),
+    /// so merely skipping the marker would replay the cancelled rating as if it
+    /// had stood, and every card ever undone after a push would come back with
+    /// the wrong stability, reps and due. `XP.total` pairs markers the same way.
     static func replay(_ rows: [Row], scheduler: Scheduler) -> [String: CardSchedulingSnapshot] {
         var byCard: [String: [(index: Int, row: Row)]] = [:]
         for (index, row) in rows.enumerated() {
@@ -130,17 +134,25 @@ enum LogReplay {
                     : $0.row.reviewedAt < $1.row.reviewedAt
             }
             var snapshot = CardSchedulingSnapshot()
-            var applied = false
+            // The state before each review still standing — what undo restores.
+            var before: [CardSchedulingSnapshot] = []
             for entry in ordered {
-                guard let outcome = try? scheduler.apply(entry.row.grade, to: snapshot,
+                guard let grade = entry.row.grade else {
+                    // A marker with nothing left to cancel — its review's row is
+                    // missing from the sheet — is inert, as it is for `XP`.
+                    if let previous = before.popLast() { snapshot = previous }
+                    continue
+                }
+                guard let outcome = try? scheduler.apply(grade, to: snapshot,
                                                          now: entry.row.reviewedAt)
                 else { continue }
+                before.append(snapshot)
                 snapshot = outcome.snapshot
-                applied = true
             }
-            // A card whose every row failed to apply is left out entirely, so the
-            // caller resets it to new rather than storing a half-replayed state.
-            if applied { result[cardId] = snapshot }
+            // A card with no review left standing — every row failed, or every
+            // review was undone — is left out entirely, so the caller resets it
+            // to new rather than storing a fresh snapshot with today's `due`.
+            if !before.isEmpty { result[cardId] = snapshot }
         }
         return result
     }

@@ -133,4 +133,17 @@ final class DoneScreenTests: XCTestCase {
         XCTAssertEqual(Streak.length(reviewDates: realReviews, now: now, calendar: calendar), 1)
         XCTAssertEqual(Streak.length(reviewDates: [], now: now, calendar: calendar), 0)
     }
+
+    // MARK: - The record line
+
+    /// §5.2: "Нова найдовша серія — 12 днів". The unit is inflected by the same
+    /// plural helpers Stats uses, so the two screens cannot disagree.
+    func testTheRecordLineNamesWhatWasBeaten() {
+        let uk = Locale(identifier: "uk")
+        XCTAssertEqual(DoneView.recordLine(.longestStreak(12), locale: uk), "Нова найдовша серія — 12 днів")
+        XCTAssertEqual(DoneView.recordLine(.bestDay(40), locale: uk), "Новий найкращий день — 40 карток")
+        XCTAssertEqual(DoneView.recordLine(.bestWeek(201), locale: uk), "Новий найкращий тиждень — 201 картка")
+        XCTAssertEqual(DoneView.recordLine(.longestStreak(12), locale: Locale(identifier: "en")),
+                       "New longest streak — 12 days")
+    }
 }

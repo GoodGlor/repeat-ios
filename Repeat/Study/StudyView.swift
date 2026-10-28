@@ -9,6 +9,11 @@ struct StudyView: View {
     @Bindable var session: StudySession
     /// Streak is computed by the caller, which already holds the log (§6.5).
     var streak: Int = 0
+    /// §5.6: computed by the caller when the session ends, shown once on Done.
+    var celebration: [Celebration.Line] = []
+    /// #112. Forwarded rather than defaulted, because naming a freeze needs the
+    /// owner's context and this view has none.
+    var markFreezeAnnounced: () -> Void = {}
     var onClose: () -> Void
     var onAddCards: () -> Void = {}
 
@@ -23,6 +28,10 @@ struct StudyView: View {
     /// input, not scheduling state, and it must not survive an undo.
     @State private var typed = ""
     @State private var submittedAnswer: String?
+    /// #149: the current card's picture, read from disk once per card rather
+    /// than on every body pass — the body reruns on every frame of a swipe.
+    /// Keyed by card id so a picture never shows on the card after it.
+    @State private var picture: (cardId: String, image: UIImage)?
     /// §6.3 says gestures are optional and on by default; #21 wires the toggle.
     private let gesturesEnabled = true
 
@@ -108,6 +117,8 @@ struct StudyView: View {
             DoneView(
                 summary: summary,
                 streak: streak,
+                celebration: celebration,
+                markFreezeAnnounced: markFreezeAnnounced,
                 onBackToDecks: onClose,
                 onAddCards: onAddCards
             )
@@ -192,6 +203,7 @@ struct StudyView: View {
         .task(id: session.current?.id) {
             typed = ""
             submittedAnswer = nil
+            loadPicture(for: session.current)
             play(StudySpeech.onShow(card: session.current))
         }
         // An undo puts an already-graded card back in front of the person, and
@@ -290,6 +302,16 @@ struct StudyView: View {
 
     // MARK: - Card
 
+    /// A missing file means no picture yet (not synced, or the link failed):
+    /// the card shows without one.
+    private func loadPicture(for card: Card?) {
+        guard let card,
+              let file = (try? PictureStore.standard())?.existingFile(for: card.note.extras),
+              let image = UIImage(contentsOfFile: file.path)
+        else { picture = nil; return }
+        picture = (card.id, image)
+    }
+
     private func cardFace(_ card: Card) -> some View {
         // The card itself is `FlashcardFace`, shared with onboarding (§6.1). Only
         // the interaction lives here: onboarding shows the same card and must not
@@ -299,6 +321,7 @@ struct StudyView: View {
             back: card.note.back,
             example: card.note.example,
             extras: card.note.displayExtras,
+            picture: picture?.cardId == card.id ? picture?.image : nil,
             isRevealed: session.isRevealed,
             // The hint has to describe the interaction that is actually there.
             prompt: typeAnswerForCurrentCard ? nil : "Торкнись, щоб перевірити",
@@ -342,6 +365,7 @@ struct StudyView: View {
             ? Localized.string("\(spokenFront(card)). Відповідь: \(card.note.back)")
             : spokenFront(card)
         )
+        .accessibilityValue(picture?.cardId == card.id ? Localized.string("з картинкою") : "")
         .accessibilityHint(session.isRevealed ? "" : "Торкніться, щоб побачити відповідь")
         // Only a button when tapping it actually does something. In type-answer
         // mode the card is read, not activated — the text field is the control —
@@ -422,6 +446,10 @@ struct StudyView: View {
                         Text(session.previews[grade]?.label ?? "—")
                             .scaledFont(12, weight: .medium, relativeTo: .caption)
                             .monospacedDigit()
+                            // "24.3 міс." is the widest label; at the larger
+                            // Dynamic Type sizes it must shrink, not wrap.
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                             .opacity(0.85)
                     }
                     .frame(maxWidth: .infinity)

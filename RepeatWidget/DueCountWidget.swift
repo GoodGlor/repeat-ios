@@ -2,21 +2,27 @@ import WidgetKit
 import SwiftUI
 
 /// §7.1: due count on the lock screen and home screen, one tap into the session.
+/// #111 added the daily-goal ring and the streak on the two home-screen sizes.
+///
+/// The layouts themselves live in `Repeat/WidgetUI/DueCountView.swift`, where a
+/// test can render them — see the note at the top of that file. What is left here
+/// is the part WidgetKit owns: the timeline, and reading the family out of the
+/// environment.
 struct DueEntry: TimelineEntry {
     let date: Date
     let count: DueCount?
 
-    /// A count computed for another day is not a small error — it is the wrong
-    /// number. The widget says nothing rather than something false.
-    var due: Int? {
-        guard let count, count.isFresh(on: date) else { return nil }
-        return count.due
-    }
+    /// Every rendering decision, made once. A count computed for another day is
+    /// not a small error — it is the wrong number — and the rule that drops it
+    /// drops the goal and the streak with it.
+    var snapshot: WidgetSnapshot { .make(from: count, on: date) }
 }
 
 struct DueCountProvider: TimelineProvider {
     func placeholder(in context: Context) -> DueEntry {
-        DueEntry(date: .now, count: DueCount(due: 12, day: Calendar.current.startOfDay(for: .now)))
+        DueEntry(date: .now,
+                 count: DueCount(due: 12, day: Calendar.current.startOfDay(for: .now),
+                                 goalTarget: 30, goalDone: 18, streak: 9))
     }
 
     func getSnapshot(in context: Context, completion: @escaping (DueEntry) -> Void) {
@@ -39,87 +45,24 @@ struct DueCountProvider: TimelineProvider {
 struct DueCountWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "DueCount", provider: DueCountProvider()) { entry in
-            DueCountView(entry: entry)
+            DueCountEntryView(entry: entry)
                 .widgetURL(URL(string: DeepLink.study))
         }
         .configurationDisplayName("Repeat")
-        .description("Скільки карток чекає на повторення.")
-        .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryRectangular])
+        .description("Скільки карток чекає на повторення, і як просувається день.")
+        .supportedFamilies([.systemSmall, .systemMedium,
+                            .accessoryCircular, .accessoryRectangular])
     }
 }
 
-/// Each family gets its own shape rather than one layout scaled: a circular
-/// complication has room for a number and nothing else, and a rectangular one
-/// reads as a sentence.
-struct DueCountView: View {
+/// The one line `DueCountView` cannot own: `\.widgetFamily` is readable only
+/// inside a widget host, and a view that reads it there is a view no test can ask
+/// for the medium layout.
+struct DueCountEntryView: View {
     @Environment(\.widgetFamily) private var family
     let entry: DueEntry
 
     var body: some View {
-        switch family {
-        case .accessoryCircular:
-            circular.containerBackground(.clear, for: .widget)
-        case .accessoryRectangular:
-            rectangular.containerBackground(.clear, for: .widget)
-        default:
-            small.containerBackground(.fill.tertiary, for: .widget)
-        }
-    }
-
-    private var circular: some View {
-        ZStack {
-            AccessoryWidgetBackground()
-            VStack(spacing: -2) {
-                Text(entry.due.map(String.init) ?? "—")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .minimumScaleFactor(0.6)
-                Text("картки")
-                    .font(.system(size: 9))
-            }
-        }
-        .accessibilityLabel(accessibilityLabel)
-    }
-
-    private var rectangular: some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text("Repeat").font(.caption).fontWeight(.semibold)
-            Text(headline).font(.headline)
-            if entry.due != nil {
-                Text(subtitle).font(.caption2)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(accessibilityLabel)
-    }
-
-    private var small: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Spacer(minLength: 0)
-            Text(entry.due.map(String.init) ?? "—")
-                .font(.system(size: 44, weight: .bold, design: .rounded))
-                .minimumScaleFactor(0.5)
-            Text(headline)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Spacer(minLength: 0)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(accessibilityLabel)
-    }
-
-    private var headline: String {
-        guard let due = entry.due else { return "Відкрийте застосунок" }
-        return due == 0 ? "На сьогодні все" : "до повторення"
-    }
-
-    private var subtitle: String {
-        entry.due == 0 ? "До завтра" : "Торкніться, щоб почати"
-    }
-
-    private var accessibilityLabel: String {
-        guard let due = entry.due else { return "Repeat: кількість невідома" }
-        return due == 0 ? "Repeat: на сьогодні все" : "Repeat: \(due) карток до повторення"
+        DueCountView(snapshot: entry.snapshot, family: family)
     }
 }

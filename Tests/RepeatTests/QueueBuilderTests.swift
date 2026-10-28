@@ -167,6 +167,61 @@ final class QueueBuilderTests: XCTestCase {
         XCTAssertEqual(result.newCardCount, 30, "60 allowed per-deck, 30 allowed overall")
     }
 
+    /// The ceiling is a *day's* ceiling, not a build's. Home rebuilds the plan on
+    /// appear, on foreground and after every sync; each build used to start the
+    /// count at zero, so once the first thirty were studied the next build handed
+    /// out thirty more from the decks not yet touched — sixty in a day against a
+    /// setting that says thirty.
+    func testTheGlobalCapCountsWhatTheDayAlreadyIntroduced() throws {
+        let ctx = try makeContext()
+        var decks: [Deck] = []
+        var cards: [Card] = []
+        for index in 0..<4 {
+            let deck = Deck(sheetTitle: "Deck \(index)", sheetId: index, newCardsPerDay: 15, sortOrder: index)
+            ctx.insert(deck)
+            for row in 0..<15 { cards += addCard(ctx, to: deck, row: row) }
+            decks.append(deck)
+        }
+        let config = QueueConfig(globalNewCardCap: 30)
+        let first = plan(decks, config: config)
+        XCTAssertEqual(first.newCardCount, 30)
+
+        // Study them all: each leaves `.new` and writes its log row.
+        var logs: [ReviewLog] = []
+        for card in cards where first.cardIds.contains(card.id) {
+            card.state = .learning
+            card.lastReview = now
+            card.due = now.addingTimeInterval(600)
+            logs.append(try ReviewLog(
+                cardId: card.id, direction: .forward, rating: 3, reviewedAt: now,
+                elapsedDays: 0, scheduledDays: 0, stateBefore: .new, prevState: CardSchedulingSnapshot()))
+        }
+
+        let second = plan(decks, config: config, logsToday: logs)
+        XCTAssertEqual(second.newCardCount, 0, "the day's thirty are spent")
+
+        // And a partial day leaves exactly the remainder.
+        let third = plan(decks, config: config, logsToday: Array(logs.prefix(25)))
+        XCTAssertEqual(third.newCardCount, 5)
+    }
+
+    /// The ceiling is a maximum, never a target: it cannot hand out cards a deck
+    /// has not allowed. Raising the app-wide setting to 30 while the only deck
+    /// still says 15 is the shape of the bug that sent someone looking for a
+    /// second stepper they could not find, so it is pinned rather than assumed.
+    func testTheGlobalCeilingDoesNotRaiseADeckBelowIt() throws {
+        let ctx = try makeContext()
+        let deck = Deck(sheetTitle: "Verbs", sheetId: 1, newCardsPerDay: 15); ctx.insert(deck)
+        for row in 0..<40 { addCard(ctx, to: deck, row: row) }
+
+        XCTAssertEqual(plan([deck], config: QueueConfig(globalNewCardCap: 30)).newCardCount, 15,
+                       "the deck's own allowance is the binding one")
+
+        deck.newCardsPerDay = 30
+        XCTAssertEqual(plan([deck], config: QueueConfig(globalNewCardCap: 30)).newCardCount, 30,
+                       "and raising it is what actually changes the day")
+    }
+
     /// A card that is no longer `.new` looks identical whether it was introduced
     /// today or last month, so this can only come from the log.
     func testNewCardsAlreadyIntroducedTodayReduceTodaysAllowance() throws {

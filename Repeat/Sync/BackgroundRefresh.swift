@@ -8,20 +8,34 @@ import BackgroundTasks
 /// crashes at launch, so the two must stay in step.
 enum BackgroundRefresh {
     static let identifier = "com.goodglor.repeat.refresh"
-    /// "Once a day if the app hasn't been opened" (§4.2). iOS treats this as the
-    /// earliest it may run, not a promise — a phone that is never idle and never
-    /// charged may go days without one, which is why every foreground also syncs.
-    static let interval: TimeInterval = 24 * 60 * 60
+    /// "Once a day if the app hasn't been opened" (§4.2), anchored to **05:00
+    /// local** rather than to 24 hours after whenever the last run happened.
+    ///
+    /// iOS treats this as the earliest it may run, not a promise — a phone that is
+    /// never idle and never charged may go days without one, which is why every
+    /// foreground also syncs.
+    ///
+    /// #139: `now + 24h` made the slot walk forward to wherever iOS last chose to
+    /// run it, and the handler reschedules itself first thing, so the walk
+    /// compounds. Once it settled past the streak hour the reminder was armed too
+    /// late to be armed at all — #110's rule is that the streak reminder can only
+    /// ever be scheduled for *tonight*, because with no review today the streak
+    /// breaks at midnight. A drifted slot meant silence every night, permanently.
+    ///
+    /// 05:00 because it is earlier than any reminder hour the owner can pick, so
+    /// the refresh that arms tonight's reminder always runs before it could fire.
+    static let anchorMinutes = 5 * 60
 
     /// Must be called before the app finishes launching, or `BGTaskScheduler`
     /// raises.
     /// `afterSync` runs on the main actor once the sync finishes, successfully or
-    /// not. It is how §8's "backup runs without the app being opened that day" is
-    /// met: this task is the only code that runs on a day nobody opens the app.
+    /// not, and is awaited, so the task is not reported complete under it. It is
+    /// how §8's "backup runs without the app being opened that day" is met: this
+    /// task is the only code that runs on a day nobody opens the app.
     /// Kept as a closure rather than a `ModelContainer` so this type stays free of
     /// SwiftData — and so a test can observe it without a store.
     static func register(coordinator: @escaping @MainActor @Sendable () -> SyncCoordinator?,
-                         afterSync: @escaping @MainActor @Sendable () -> Void = {}) {
+                         afterSync: @escaping @MainActor @Sendable () async -> Void = {}) {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: identifier, using: nil) { task in
             // Reschedule first: if the run below crashes or is killed, the next
             // one is already booked.
@@ -30,9 +44,17 @@ enum BackgroundRefresh {
         }
     }
 
-    static func schedule(after interval: TimeInterval = interval, now: Date = .now) {
+    /// The next moment the wall clock reads `anchorMinutes`.
+    ///
+    /// Through `ReminderTime` (#128) rather than by adding seconds, so it does not
+    /// drift an hour across a DST boundary the way both evening reminders did.
+    static func nextBegin(after now: Date = .now, calendar: Calendar = .current) -> Date {
+        ReminderTime.next(after: now, minutes: anchorMinutes, calendar: calendar)
+    }
+
+    static func schedule(now: Date = .now, calendar: Calendar = .current) {
         let request = BGAppRefreshTaskRequest(identifier: identifier)
-        request.earliestBeginDate = now.addingTimeInterval(interval)
+        request.earliestBeginDate = nextBegin(after: now, calendar: calendar)
         // Throws in the simulator and whenever the entitlement is missing. A
         // failure here costs a day's background sync, not correctness — every
         // foreground syncs too — so it is logged rather than raised.
@@ -42,7 +64,7 @@ enum BackgroundRefresh {
 
     private static func handle(task: BGTask,
                                coordinator: @escaping @MainActor @Sendable () -> SyncCoordinator?,
-                               afterSync: @escaping @MainActor @Sendable () -> Void) {
+                               afterSync: @escaping @MainActor @Sendable () async -> Void) {
         let work = Task { @MainActor in
             guard let coordinator = coordinator() else {
                 task.setTaskCompleted(success: false)
@@ -51,7 +73,7 @@ enum BackgroundRefresh {
             let report = await coordinator.performAndWait(.backgroundRefresh)
             // Runs even when the sync did not: a phone that is offline for a week
             // still deserves its nightly snapshot of local scheduling.
-            afterSync()
+            await afterSync()
             task.setTaskCompleted(success: report.didRun)
         }
         // The budget is seconds, not minutes. Cancelling propagates through the

@@ -7,33 +7,6 @@ import Scheduling
 /// #27 — one notification a day, and never a false one.
 final class DailyReminderTests: XCTestCase {
 
-    /// Records what would have been scheduled.
-    private final class FakeScheduler: NotificationScheduling, @unchecked Sendable {
-        private let lock = NSLock()
-        private var requests: [UNNotificationRequest] = []
-        private(set) var removals: [[String]] = []
-
-        func pendingRequests() async -> [UNNotificationRequest] {
-            lock.lock(); defer { lock.unlock() }
-            return requests
-        }
-
-        func removePending(identifiers: [String]) async {
-            lock.lock(); defer { lock.unlock() }
-            removals.append(identifiers)
-            requests.removeAll { identifiers.contains($0.identifier) }
-        }
-
-        func add(_ request: UNNotificationRequest) async throws {
-            lock.lock(); defer { lock.unlock() }
-            // Mirrors UNUserNotificationCenter: same identifier replaces.
-            requests.removeAll { $0.identifier == request.identifier }
-            requests.append(request)
-        }
-
-        func requestAuthorization() async -> Bool { true }
-    }
-
     private var calendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: 0)!
@@ -236,5 +209,48 @@ final class DailyReminderTests: XCTestCase {
             now: now, calendar: calendar, using: scheduler)
 
         XCTAssertNil(plan)
+    }
+
+    // MARK: - Isolation (the pull-to-refresh crash, 2026-09-04)
+
+    /// Records which thread `refresh` was on each time it called in.
+    ///
+    /// `nonisolated(nonsending)` keeps these methods on their **caller's** executor,
+    /// so what they record is the executor of `refresh`'s body — the thing under
+    /// test — and not a hop of their own.
+    private final class ThreadProbeScheduler: NotificationScheduling, @unchecked Sendable {
+        private let lock = NSLock()
+        private(set) var onMainThread: [Bool] = []
+
+        private func record() {
+            lock.lock(); defer { lock.unlock() }
+            onMainThread.append(pthread_main_np() != 0)
+        }
+
+        nonisolated(nonsending) func pendingRequests() async -> [UNNotificationRequest] { record(); return [] }
+        nonisolated(nonsending) func removePending(identifiers: [String]) async { record() }
+        nonisolated(nonsending) func add(_ request: UNNotificationRequest) async throws { record() }
+        nonisolated(nonsending) func requestAuthorization() async -> Bool { record(); return true }
+    }
+
+    /// `refresh` reads a `ModelContext` and the models it fetches. Those belong to
+    /// whoever called — Home hands over the **main** context — so the body has to
+    /// run on the caller's actor. A plain `nonisolated async` function does not: it
+    /// hops to the cooperative pool on entry. Three crash reports from the owner's
+    /// phone put it exactly there, reading `ReviewLog.stateBefore` on thread 6 while
+    /// the main thread was rendering the same objects.
+    @MainActor
+    func testRefreshStaysOnTheActorThatCalledIt() async throws {
+        let (context, deck) = try makeStore()
+        addCards(context, to: deck, count: 3, due: now)
+        let scheduler = ThreadProbeScheduler()
+
+        await DailyReminder.refresh(
+            in: context, enabled: true, reminderMinutes: evening, now: now, using: scheduler
+        )
+
+        XCTAssertEqual(scheduler.onMainThread.count, 2, "expected a removal and an add")
+        XCTAssertTrue(scheduler.onMainThread.allSatisfy { $0 },
+                      "refresh left the main actor — main thread per call: \(scheduler.onMainThread)")
     }
 }

@@ -9,6 +9,7 @@ import Scheduling
 /// scheduling *exactly*, so most of these compare a replayed snapshot against one
 /// produced by the ordinary rating path rather than against a hardcoded number.
 /// A test that asserted literals would keep passing if both sides drifted.
+@MainActor
 final class LogReplayTests: XCTestCase {
 
     private var container: ModelContainer!
@@ -19,6 +20,7 @@ final class LogReplayTests: XCTestCase {
         try super.setUpWithError()
         container = try ModelContainer(
             for: Deck.self, Note.self, Card.self, ReviewLog.self, InboxItem.self, SyncConflict.self,
+            StreakFreeze.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )
         context = ModelContext(container)
@@ -92,6 +94,72 @@ final class LogReplayTests: XCTestCase {
 
         let parse = LogReplay.parse(Self.sheet(rows))
         let replayed = LogReplay.replay(parse.rows, scheduler: scheduler)
+
+        XCTAssertEqual(replayed[card.id], live)
+    }
+
+    /// #112: a rebuild replays `_log`, and `_log` has no row for a day on which
+    /// nothing happened — so a rebuild can neither recreate a freeze nor be
+    /// allowed to destroy one. `RebuildScheduling.apply` iterates `Card`s only,
+    /// which makes this true today by accident; the test makes it true on
+    /// purpose.
+    func testARebuildFromTheLogLeavesFreezesAlone() async throws {
+        let card = try makeCard(seed: 1)
+        let scheduler = Scheduler()
+        let at = Self.start.addingTimeInterval(86_400)
+        try context.rate(card, .good, with: scheduler, now: at)
+
+        let frozen = Calendar.current.startOfDay(for: Self.start)
+        context.insert(StreakFreeze(day: frozen, spentAt: Self.start))
+        try context.save()
+
+        let rows = [Self.sheetRow(cardId: card.id, rating: Grade.good.rawValue, at: at)]
+        let report = try await RebuildScheduling.apply(
+            LogReplay.parse(Self.sheet(rows)), in: context,
+            config: SchedulerConfig(), backupDirectory: directory, now: Self.start
+        )
+
+        XCTAssertEqual(report.cardsRebuilt, 1, "the rebuild has to have actually run")
+        XCTAssertEqual(Freeze.days(in: context), [frozen],
+                       "the rebuild ate a freeze it could never put back")
+    }
+
+    /// #122: the Easy/Good separation lives in `Scheduler.apply`, which is the
+    /// same door replay goes through — so a rebuilt card has to land on the
+    /// adjusted date rather than the one FSRS would have produced on its own. If
+    /// the fix had gone into the study screen instead, this is the test that
+    /// would have caught it.
+    ///
+    /// The ratings happen at the card's own due dates, minutes apart, because
+    /// that is the only way to reach the collapse at all: leave a day between
+    /// ratings and stability rises enough that Good and Easy separate unaided.
+    func testReplayReproducesTheAdjustedEasyGraduation() throws {
+        let card = try makeCard(seed: 1)
+        let scheduler = Scheduler()
+
+        var rows: [[String]] = []
+        var at = Self.start
+        for grade in [Grade.again, .good] {
+            try context.rate(card, grade, with: scheduler, now: at)
+            rows.append(Self.sheetRow(cardId: card.id, rating: grade.rawValue, at: at))
+            at = card.due
+        }
+
+        // The collapse, caught in the act: Good sits on `nextInterval`'s one-day
+        // floor, and before #122 Easy sat on the very same date.
+        let graduating = try scheduler.preview(for: card.snapshot, now: at)
+        let good = try XCTUnwrap(graduating[.good])
+        let easy = try XCTUnwrap(graduating[.easy])
+        XCTAssertEqual(good.due.timeIntervalSince(at), 86_400, "Good is on the one-day floor")
+        XCTAssertEqual(easy.due.timeIntervalSince(good.due), 86_400, "and Easy is a day past it")
+
+        try context.rate(card, .easy, with: scheduler, now: at)
+        rows.append(Self.sheetRow(cardId: card.id, rating: Grade.easy.rawValue, at: at))
+        try context.save()
+        let live = card.snapshot
+        XCTAssertEqual(live.scheduledDays, 2, "the adjusted figure is what `_log` carries")
+
+        let replayed = LogReplay.replay(LogReplay.parse(Self.sheet(rows)).rows, scheduler: scheduler)
 
         XCTAssertEqual(replayed[card.id], live)
     }
@@ -190,15 +258,20 @@ final class LogReplayTests: XCTestCase {
     // MARK: - Undo markers
 
     /// Acceptance: "undo rows (`rating=0`) do not count as reviews".
-    func testUndoMarkersAreNotReviews() throws {
+    ///
+    /// A marker is written only when the review it takes back had already
+    /// reached the Sheet (§5.5), so that review's row is still there. The replay
+    /// has to cancel it, not merely step over the marker — the earlier form of
+    /// this test compared against a log that *kept* the undone Good, and so
+    /// pinned the wrong answer.
+    func testAnUndoMarkerCancelsTheReviewItTookBack() throws {
         let card = try makeCard(seed: 1)
         let withUndo = Self.sheet([
             Self.sheetRow(cardId: card.id, rating: 3, at: Self.start),
             Self.sheetRow(cardId: card.id, rating: 0, at: Self.start.addingTimeInterval(60)),
             Self.sheetRow(cardId: card.id, rating: 4, at: Self.start.addingTimeInterval(86_400)),
         ])
-        let without = Self.sheet([
-            Self.sheetRow(cardId: card.id, rating: 3, at: Self.start),
+        let asItReallyHappened = Self.sheet([
             Self.sheetRow(cardId: card.id, rating: 4, at: Self.start.addingTimeInterval(86_400)),
         ])
 
@@ -207,8 +280,65 @@ final class LogReplayTests: XCTestCase {
         XCTAssertEqual(parse.reviewCount, 2)
         XCTAssertEqual(parse.rows.first?.grade, .good)
 
-        XCTAssertEqual(LogReplay.replay(parse.rows, scheduler: Scheduler()),
-                       LogReplay.replay(LogReplay.parse(without).rows, scheduler: Scheduler()))
+        let replayed = LogReplay.replay(parse.rows, scheduler: Scheduler())
+        XCTAssertEqual(replayed,
+                       LogReplay.replay(LogReplay.parse(asItReallyHappened).rows, scheduler: Scheduler()))
+        XCTAssertEqual(replayed[card.id]?.reps, 1, "the undone Good must not count")
+    }
+
+    /// The same, measured against the live path rather than a second replay:
+    /// rate, push, undo, rate again — the two must agree to the byte.
+    func testReplayMatchesTheLivePathThroughAnUploadedUndo() throws {
+        let card = try makeCard(seed: 2)
+        let scheduler = Scheduler()
+        let deck = try deck()
+        let plan = QueuePlan(cardIds: [card.id], dueReviewCount: 1, newCardCount: 0,
+                             secondsPerCard: 20, studyDay: Self.start)
+        let session = StudySession(context: context, scheduler: scheduler, plan: plan, decks: [deck])
+
+        session.reveal(now: Self.start)
+        session.rate(.good, now: Self.start)
+        let uploaded = try XCTUnwrap(session.undoableLog)
+        uploaded.uploaded = true                       // it reached the Sheet
+        XCTAssertTrue(session.undo(now: Self.start.addingTimeInterval(60)))
+        session.reveal(now: Self.start.addingTimeInterval(120))
+        session.rate(.hard, now: Self.start.addingTimeInterval(120))
+        try context.save()
+        let live = card.snapshot
+
+        let logs = try context.fetch(FetchDescriptor<ReviewLog>())
+            .sorted { $0.reviewedAt < $1.reviewedAt }
+        XCTAssertEqual(logs.map(\.rating), [3, 0, 2])
+        let sheet = Self.sheet(logs.map {
+            Self.sheetRow(cardId: $0.cardId, rating: $0.rating, at: $0.reviewedAt)
+        })
+        let replayed = LogReplay.replay(LogReplay.parse(sheet).rows, scheduler: scheduler)
+        XCTAssertEqual(replayed[card.id], live)
+    }
+
+    /// Undone and never rated again: the card has no review standing, so it is
+    /// reset to new exactly like a card the log never mentions.
+    func testACardWhoseOnlyReviewWasUndoneIsReset() throws {
+        let card = try makeCard(seed: 3)
+        let parse = LogReplay.parse(Self.sheet([
+            Self.sheetRow(cardId: card.id, rating: 3, at: Self.start),
+            Self.sheetRow(cardId: card.id, rating: 0, at: Self.start.addingTimeInterval(60)),
+        ]))
+        XCTAssertNil(LogReplay.replay(parse.rows, scheduler: Scheduler())[card.id])
+    }
+
+    /// A marker with nothing to cancel — its review's row was lost — is inert.
+    func testAStrayUndoMarkerChangesNothing() throws {
+        let card = try makeCard(seed: 4)
+        let stray = LogReplay.parse(Self.sheet([
+            Self.sheetRow(cardId: card.id, rating: 0, at: Self.start),
+            Self.sheetRow(cardId: card.id, rating: 3, at: Self.start.addingTimeInterval(60)),
+        ]))
+        let clean = LogReplay.parse(Self.sheet([
+            Self.sheetRow(cardId: card.id, rating: 3, at: Self.start.addingTimeInterval(60)),
+        ]))
+        XCTAssertEqual(LogReplay.replay(stray.rows, scheduler: Scheduler()),
+                       LogReplay.replay(clean.rows, scheduler: Scheduler()))
     }
 
     // MARK: - Parsing
@@ -368,6 +498,30 @@ final class LogReplayTests: XCTestCase {
                        "the snapshot must hold the state from before the rebuild")
         // And the rebuild really did replace it.
         XCTAssertEqual(card.state, .new)
+    }
+
+    /// The backup is "the only thing that makes it reversible", so a backup that
+    /// cannot be written must stop the rebuild before anything is replaced —
+    /// not be swallowed by `try?` on the way to replacing every card's schedule.
+    func testARebuildWhoseBackupFailsTouchesNothing() async throws {
+        let card = try makeCard(seed: 1)
+        card.state = .review
+        card.reps = 5
+        try context.save()
+        let before = card.snapshot
+
+        // A *file* where the backup directory should be: nothing can be written under it.
+        let blocked = directory.appendingPathComponent("blocked")
+        try Data().write(to: blocked)
+
+        do {
+            _ = try await RebuildScheduling.apply(
+                LogReplay.parse([]), in: context, config: SchedulerConfig(),
+                backupDirectory: blocked, now: Self.start)
+            XCTFail("a rebuild without a backup must not run")
+        } catch {
+            XCTAssertEqual(card.snapshot, before, "nothing was replaced")
+        }
     }
 
     /// An empty `_log` resets everything. That is correct — and exactly why the

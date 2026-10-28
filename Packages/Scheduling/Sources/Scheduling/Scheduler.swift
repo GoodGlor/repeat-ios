@@ -26,6 +26,20 @@ public struct GradeOutcome: Equatable, Sendable {
     public var stateBefore: SchedulingState { previous.state }
 }
 
+/// The one thing that can go wrong inside the seam.
+public enum SchedulerError: Error, Equatable, CustomStringConvertible {
+    /// The engine returned no outcome for a grade. Unreachable — the library
+    /// fills all four ratings on every call — but `apply` has to answer for it
+    /// somehow, and a crash on a rating tap is not the answer.
+    case gradeNotScheduled(Grade)
+
+    public var description: String {
+        switch self {
+        case .gradeNotScheduled(let grade): "FSRS returned no outcome for \(grade)"
+        }
+    }
+}
+
 /// The one seam between the app and `swift-fsrs` (§5.1).
 ///
 /// It is a separate module rather than a file for a concrete reason: the library
@@ -61,13 +75,15 @@ public struct Scheduler: Sendable {
         now: Date = .now
     ) throws -> [Grade: GradePreview] {
         let preview = try engine.repeat(card: card(from: snapshot), now: now)
+        let easy = separatedEasy(in: preview)
         var result: [Grade: GradePreview] = [:]
         for grade in Grade.allCases {
             guard let item = preview[grade.fsrs] else { continue }
+            let due = grade == .easy ? (easy?.due ?? item.card.due) : item.card.due
             result[grade] = GradePreview(
                 grade: grade,
-                due: item.card.due,
-                interval: item.card.due.timeIntervalSince(now),
+                due: due,
+                interval: due.timeIntervalSince(now),
                 resultingState: SchedulingState(item.card.state)
             )
         }
@@ -81,7 +97,21 @@ public struct Scheduler: Sendable {
         to snapshot: CardSchedulingSnapshot,
         now: Date = .now
     ) throws -> GradeOutcome {
-        let updated = try engine.next(card: card(from: snapshot), now: now, grade: grade.fsrs).card
+        // `repeat` rather than `next`, which returns the asked-for grade alone:
+        // separating Easy from Good means that applying Easy has to see Good.
+        // The two are interchangeable — each builds a fresh scheduler from the
+        // same inputs, so the same seed — and `testPreviewMatchesWhatApplying`
+        // `ActuallySchedules` is the standing proof, since it has always compared
+        // this method against `preview`, which has always used `repeat`.
+        let outcomes = try engine.repeat(card: card(from: snapshot), now: now)
+        guard let item = outcomes[grade.fsrs] else {
+            throw SchedulerError.gradeNotScheduled(grade)
+        }
+        var updated = item.card
+        if grade == .easy, let easy = separatedEasy(in: outcomes) {
+            updated.due = easy.due
+            updated.scheduledDays = easy.scheduledDays
+        }
 
         var next = snapshot
         next.state = SchedulingState(updated.state)
@@ -112,6 +142,38 @@ public struct Scheduler: Sendable {
     /// which cards can safely be pushed out of a backlog — the most fragile stay.
     public func retrievability(of snapshot: CardSchedulingSnapshot, now: Date = .now) -> Double {
         engine.getRetrievability(card: card(from: snapshot), now: now).number
+    }
+
+    /// Where Easy really lands, when FSRS would have put it no further out than
+    /// Good (#122).
+    ///
+    /// Graduating out of learning is the one transition the library computes a
+    /// grade at a time — `newState` and `learningState` call `applyLearningSteps`
+    /// per grade, and only `reviewState` runs `nextIntervalReview`, which is what
+    /// enforces `easy ≥ good + 1`. On a card whose stability is still low (any
+    /// card rated `Again` at least once) Good and Easy both hit `nextInterval`'s
+    /// `max(1, …)` floor and the owner is shown `Good 1d · Easy 1d`: four buttons
+    /// making three promises. Upstream ts-fsrs has the same shape, so this is
+    /// corrected here rather than waited out.
+    ///
+    /// `Again` and `Hard` are deliberately untouched — in learning they are still
+    /// on their steps, which is right.
+    ///
+    /// In `.review` this returns `nil` by construction rather than by a state
+    /// check: `nextIntervalReview` has already guaranteed the gap, so the
+    /// `easy.due <= good.due` guard cannot hold there. It is a repair for one
+    /// gap in the library, not a second ordering rule competing with its own.
+    private func separatedEasy(in preview: IPreview) -> (due: Date, scheduledDays: Double)? {
+        guard let good = preview[Grade.good.fsrs]?.card,
+              let easy = preview[Grade.easy.fsrs]?.card,
+              SchedulingState(good.state) == .review,
+              SchedulingState(easy.state) == .review,
+              easy.due <= good.due
+        else { return nil }
+        // A flat 86 400 seconds, which is exactly what the library's own
+        // `Date.dateScheduler(now:t:unit:.days)` adds — so the two agree, and a
+        // replay of this rating reproduces it (D4).
+        return (good.due.addingTimeInterval(24 * 60 * 60), good.scheduledDays + 1)
     }
 
     private func card(from snapshot: CardSchedulingSnapshot) -> Card {

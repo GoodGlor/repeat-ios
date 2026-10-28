@@ -18,6 +18,7 @@ final class BackupTests: XCTestCase {
         try super.setUpWithError()
         container = try ModelContainer(
             for: Deck.self, Note.self, Card.self, ReviewLog.self, InboxItem.self, SyncConflict.self,
+            StreakFreeze.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )
         context = ModelContext(container)
@@ -32,6 +33,57 @@ final class BackupTests: XCTestCase {
         try? FileManager.default.removeItem(at: directory)
         defaults.removePersistentDomain(forName: suiteName)
         super.tearDown()
+    }
+
+    // MARK: - #112: the one thing a rebuild could not put back
+
+    private var frozenDay: Date {
+        Calendar.current.startOfDay(for: Date(timeIntervalSince1970: 1_800_000_000))
+    }
+
+    func testABackupCarriesFrozenDaysAndARestorePutsThemBack() throws {
+        context.insert(StreakFreeze(day: frozenDay, spentAt: .now))
+        try context.save()
+
+        let backup = try BackupRunner.makeBackup(in: context, now: .now)
+        XCTAssertEqual(backup.version, 2)
+        XCTAssertEqual(backup.frozenDays, [frozenDay])
+
+        // Lose it, the way wiping the store would.
+        try context.delete(model: StreakFreeze.self)
+        try context.save()
+        XCTAssertTrue(Freeze.rows(in: context).isEmpty)
+
+        _ = try BackupRunner.restore(backup, in: context)
+        XCTAssertEqual(Freeze.days(in: context), [frozenDay],
+                       "a rebuild from `_log` cannot recover a freeze, so the backup must")
+    }
+
+    /// The same choice `RestoreReport.untouched` already makes for cards added
+    /// since: a restore rewinds what it has a record of and destroys nothing it
+    /// does not.
+    func testARestoreLeavesAFreezeSpentSinceTheBackupAlone() throws {
+        context.insert(StreakFreeze(day: frozenDay, spentAt: .now))
+        try context.save()
+        let backup = try BackupRunner.makeBackup(in: context, now: .now)
+
+        let later = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: 3, to: frozenDay))
+        context.insert(StreakFreeze(day: later, spentAt: .now))
+        try context.save()
+
+        _ = try BackupRunner.restore(backup, in: context)
+        XCTAssertEqual(Freeze.days(in: context), [frozenDay, later])
+    }
+
+    /// Every backup already on the owner's phone was written before freezes
+    /// existed. `decoded` guards `version <= currentVersion`, and `frozenDays` is
+    /// defaulted, so an old file opens and simply has none — a backup that would
+    /// not open is no backup at all.
+    func testABackupWrittenBeforeFreezesExistedStillOpens() throws {
+        let json = Data(#"{"version":1,"createdAt":0,"entries":[]}"#.utf8)
+        let backup = try SchedulingBackup.decoded(from: json)
+        XCTAssertEqual(backup.version, 1)
+        XCTAssertTrue(backup.frozenDays.isEmpty)
     }
 
     // MARK: - Fixtures

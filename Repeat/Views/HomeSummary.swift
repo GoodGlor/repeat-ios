@@ -20,6 +20,10 @@ struct HomeSummary: Equatable {
         /// Shown instead of a badge when the deck owes nothing today.
         var nextDueLabel: String?
         var malformedReason: String?
+        /// §5.3: known ▮ learning ▮ new, over the same cards as `cardCount`.
+        var mastery: Mastery.Counts
+        /// #153: the tag this deck is studied under, when it is not all cards.
+        var filterLabel: String? = nil
     }
 
     var greeting: String
@@ -30,29 +34,34 @@ struct HomeSummary: Equatable {
     /// per log, so a card seen three times through its learning steps counts once
     /// — otherwise a short session can report more progress than there was work.
     var reviewedToday: Int
+    /// M9 §5.1: today's target, fixed at the first build of the day.
+    var goal: DailyGoal
     var decks: [DeckRow]
 
     var isAllDone: Bool { dueCount == 0 }
 
-    /// How much of today is behind you, 0…1 (#89).
-    ///
-    /// The denominator is what today turned out to be — everything already done
-    /// plus everything still planned — not a target set in advance. A goal the
-    /// app invents would be a number to fail; this one can only ever move
-    /// forward, and reaches 1 exactly when the queue empties.
-    ///
-    /// Zero when there is nothing on either side of the ratio, so a fresh install
-    /// draws an empty ring rather than a full one.
-    var todayProgress: Double {
-        let total = reviewedToday + dueCount
-        guard total > 0 else { return 0 }
-        return Double(reviewedToday) / Double(total)
+    /// How much of today is behind you, 0…1 (#89), against a target that does
+    /// not move (M9). Counted per card, not per log, against that fixed target
+    /// — see `DailyGoal` for why the denominator is fixed and `reviewedCount`
+    /// for why the numerator is per card.
+    var todayProgress: Double { goal.progress }
+
+    /// The rule `reviewedToday` uses: a real grade, once per card, today.
+    /// `rating != 0` excludes the log rows a rebuild from `_log` writes for
+    /// cards that were never actually answered (#41) — those rows exist to
+    /// carry scheduling state across the rebuild, not to record a review.
+    static func reviewedCount(logsToday: [ReviewLog], now: Date, calendar: Calendar = .current) -> Int {
+        Set(
+            logsToday.filter { $0.rating != 0 && calendar.isDate($0.reviewedAt, inSameDayAs: now) }
+                .map(\.cardId)
+        ).count
     }
 
     static func make(
         decks: [Deck],
         plan: QueuePlan,
         logsToday: [ReviewLog],
+        cachedTarget: Int? = nil,
         now: Date = .now,
         calendar: Calendar = .current
     ) -> HomeSummary {
@@ -60,13 +69,21 @@ struct HomeSummary: Equatable {
             ($0.sortOrder, $0.sheetTitle) < ($1.sortOrder, $1.sheetTitle)
         }
 
+        // Cards are selected by *query*, not by walking `deck.notes → note.cards`
+        // (#116 — the rule #84 gave the queue builder). The walk resolves one
+        // relationship fault per note, and SwiftData turns those faults back on
+        // after every fetch of the parent — the view's own `@Query` included — so
+        // the walk was cold on every Home pass: **2.4 s** at ten thousand cards
+        // against 0.07 s warm. A fetch with the two-hop join in the predicate
+        // reads the columns straight from SQLite, and costs the same every time.
+        var cardsByDeck: [String: [Card]] = [:]
+        for deck in live { cardsByDeck[deck.sheetTitle] = cards(of: deck) }
+
         // card id → deck, so the plan can be split by deck without re-deriving
         // which cards are due.
         var deckOfCard: [String: String] = [:]
-        for deck in live {
-            for note in deck.notes where note.deletedAt == nil {
-                for card in note.cards { deckOfCard[card.id] = deck.sheetTitle }
-            }
+        for (title, cards) in cardsByDeck {
+            for card in cards { deckOfCard[card.id] = title }
         }
 
         var dueByDeck: [String: Int] = [:]
@@ -86,7 +103,7 @@ struct HomeSummary: Equatable {
         }
 
         let rows = live.map { deck -> DeckRow in
-            let cards = deck.notes.filter { $0.deletedAt == nil }.flatMap(\.cards)
+            let cards = cardsByDeck[deck.sheetTitle] ?? []
             let due = dueByDeck[deck.sheetTitle] ?? 0
             return DeckRow(
                 id: deck.sheetTitle,
@@ -98,17 +115,13 @@ struct HomeSummary: Equatable {
                 nextDueLabel: due == 0
                     ? nextDueLabel(for: cards, now: now, calendar: calendar)
                     : nil,
-                malformedReason: deck.malformedReason
+                malformedReason: deck.malformedReason,
+                mastery: Mastery.Counts.make(cards: cards),
+                filterLabel: plan.filters[deck.sheetTitle]?.label
             )
         }
 
-        // Reuses the same "a real grade, once per card" rule the per-deck new
-        // count above uses — `rating != 0` excludes the log rows a rebuild writes
-        // for cards that were never actually answered (#41).
-        let reviewedToday = Set(
-            logsToday.filter { $0.rating != 0 && calendar.isDate($0.reviewedAt, inSameDayAs: now) }
-                .map(\.cardId)
-        ).count
+        let reviewedToday = reviewedCount(logsToday: logsToday, now: now, calendar: calendar)
 
         return HomeSummary(
             greeting: greeting(at: now, calendar: calendar),
@@ -116,8 +129,24 @@ struct HomeSummary: Equatable {
             estimatedMinutes: plan.estimatedMinutes,
             newCardCount: plan.newCardCount,
             reviewedToday: reviewedToday,
+            goal: DailyGoal.make(reviewedToday: reviewedToday, dueCount: plan.count,
+                                 cachedTarget: cachedTarget),
             decks: rows
         )
+    }
+
+    /// The deck's live cards — every card of every note that is not soft-deleted
+    /// — by query (see `make`). A deck that belongs to no store has no cards to
+    /// select, the same answer `QueueBuilder.plan` gives.
+    static func cards(of deck: Deck) -> [Card] {
+        guard let context = deck.modelContext else { return [] }
+        let title = deck.sheetTitle
+        let descriptor = FetchDescriptor<Card>(predicate: #Predicate<Card> { card in
+            card.note.deletedAt == nil
+                && card.note.deck.deletedAt == nil
+                && card.note.deck.sheetTitle == title
+        })
+        return (try? context.fetch(descriptor)) ?? []
     }
 
     /// When the deck's next card comes back, in the coarsest useful terms.

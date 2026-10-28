@@ -7,6 +7,7 @@ struct RepeatApp: App {
     private let container: ModelContainer
     @State private var sync: SyncCoordinator
     @Environment(\.scenePhase) private var scenePhase
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     /// #87. `@AppStorage` rather than `AppSettings` — see `Appearance` for why.
     @AppStorage(Appearance.storageKey) private var appearanceRaw = Appearance.system.rawValue
 
@@ -63,16 +64,37 @@ struct RepeatApp: App {
         let arguments = ProcessInfo.processInfo.arguments
         if arguments.contains("-resetStoreOnLaunch") {
             MainActor.assumeIsolated { SampleData.eraseEverything(container.mainContext) }
+            // The ledger lives in UserDefaults, which the store reset does not
+            // touch; a UI test that saw its badges must not hand them to the next.
+            AchievementLedger().reset()
+            // Likewise #144's remembered filters: a tag chosen by one UI test
+            // must not narrow the next test's session.
+            DeckFilter.forgetAll()
         }
         if arguments.contains("-seedSampleDataOnLaunch") {
             MainActor.assumeIsolated { SampleData.seedIfEmpty(container.mainContext) }
         }
+        #if DEBUG
+        if arguments.contains("-seedTagsOnLaunch") {
+            MainActor.assumeIsolated { SampleData.seedTags(container.mainContext) }
+        }
+        if arguments.contains("-seedPicturesOnLaunch") {
+            MainActor.assumeIsolated { SampleData.seedPictures(container.mainContext) }
+        }
+        #endif
 
         // #86: §8's "every screen works with no network", made observable. The
         // simulator has no airplane mode, so without this the offline path could
         // only be reasoned about.
         if ProcessInfo.processInfo.arguments.contains("-offlineOnLaunch") {
             SheetsSettings.debugTransport = OfflineTransport()
+        }
+        // The other half: a sync that succeeds, against a spreadsheet that exists
+        // only in memory. The pull-to-refresh crash (2026-09-04) needed a sync to
+        // *land* before it would show itself.
+        if ProcessInfo.processInfo.arguments.contains("-cannedSheetOnLaunch") {
+            let rows = MainActor.assumeIsolated { CannedSheetTransport.rows(mirroring: container.mainContext) }
+            SheetsSettings.debugTransport = CannedSheetTransport(deckRows: rows)
         }
 
         // Stands in for an intent performed before the UI exists — the same
@@ -88,8 +110,15 @@ struct RepeatApp: App {
         _sync = State(initialValue: coordinator)
         // Registration has to happen before launch finishes (§4.2 trigger 5).
         BackgroundRefresh.register { coordinator } afterSync: {
-            // §8: the day's snapshot must happen even if the app is never opened.
-            try? BackupRunner.runIfNeeded(in: container.mainContext)
+            // Everything this does lives in `BackgroundWork`, where a test can
+            // reach it (#139). `AppSettings` is read fresh on every call, unlike
+            // `SyncActor.reminder`, which is captured once at construction and
+            // left stale on purpose.
+            await BackgroundWork.run(
+                in: container.mainContext,
+                settings: AppSettings(),
+                sceneIsActive: UIApplication.shared.applicationState == .active
+            )
         }
     }
 
